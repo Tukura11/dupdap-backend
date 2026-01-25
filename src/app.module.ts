@@ -1,11 +1,22 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from './logger/logger.module';
+import { DatabaseModule } from './database/database.module';
+import { SettlementModule } from './settlement/settlement.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 
 @Module({
-  imports: [LoggerModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.local', '.env'],
+    }),
+    LoggerModule,
+    DatabaseModule,
+    SettlementModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
