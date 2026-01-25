@@ -1,14 +1,16 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DatabaseModule } from './database/database.module';
 import { LoggerModule } from './logger/logger.module';
+import { CacheModule } from './cache/cache.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
-import { ErrorMonitoringModule } from './common/monitoring/error-monitoring.module';
-import { ErrorMonitoringController } from './common/monitoring/error-monitoring.controller';
+import { GlobalConfigModule } from './config/config.module';
 
 @Module({
-  imports: [LoggerModule, ErrorMonitoringModule],
-  controllers: [AppController, ErrorMonitoringController],
+  imports: [GlobalConfigModule, DatabaseModule, LoggerModule],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
