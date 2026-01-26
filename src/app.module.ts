@@ -7,9 +7,10 @@ import { LoggerModule } from './logger/logger.module';
 import { CacheModule } from './cache/cache.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { GlobalConfigModule } from './config/config.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [GlobalConfigModule, DatabaseModule, LoggerModule],
+  imports: [GlobalConfigModule, DatabaseModule, LoggerModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
