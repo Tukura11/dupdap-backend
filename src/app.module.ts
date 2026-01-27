@@ -1,67 +1,126 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { SettlementModule } from './settlement/settlement.module';
+import { BullModule } from '@nestjs/bull';
+
+// Controllers & Services
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
+// Config & Core Modules
+
+import { GlobalConfigModule } from './global-config/global-config.module';
+import { GlobalConfigService } from './global-config/global-config.service';
+
 import { DatabaseModule } from './database/database.module';
+
 import { CacheModule } from './cache/cache.module';
+
 import { LoggerModule } from './logger/logger.module';
-import { SwaggerModule as SwaggerDocModule } from './common/swagger/swagger.module';
-import { HealthModule } from './health/health.module';
-import { WebhookModule } from './webhook/webhook.module';
-import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
-import { GlobalConfigModule } from './config/config.module';
-import { BullModule } from '@nestjs/bull';
+
+// Feature Modules
+
 import { NotificationModule } from './notification/notification.module';
-import { GlobalConfigService } from './config/global-config.service';
-import { AuthModule } from './auth/auth.module';
+
+import { AnalyticsModule } from './analytics/analytics.module';
+
+import { SettlementModule } from './settlement/settlement.module';
+
 import { TransactionsModule } from './transactions/transactions.module';
+
+import { AuthModule } from './auth/auth.module';
+
+import { HealthModule } from './health/health.module';
+
+import { WebhooksModule } from './webhooks/webhooks.module';
+
+import { SwaggerDocModule } from './swagger-doc/swagger-doc.module';
+
 import { PublicModule } from './public/public.module';
 
+// Middleware
+
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 
 @Module({
+
   imports: [
-    AuthModule,
-    ConfigModule,
-    DatabaseModule,
-    CacheModule,
-    LoggerModule,
-    SettlementModule,
-    HealthModule,
-    WebhookModule,
-    SwaggerDocModule,
+
     GlobalConfigModule,
+
     DatabaseModule,
+
+    CacheModule,
+
     LoggerModule,
+
     ScheduleModule.forRoot(),
+
     ThrottlerModule.forRoot([
+
       {
+
         ttl: 60000,
+
         limit: 10,
+
       },
+
     ]),
+
     BullModule.forRootAsync({
+
       imports: [GlobalConfigModule],
+
       useFactory: async (configService: GlobalConfigService) => ({
+
         redis: {
+
           host: configService.getRedisConfig().host,
+
           port: configService.getRedisConfig().port,
+
         },
+
       }),
+
       inject: [GlobalConfigService],
+
     }),
+
     NotificationModule,
+
+    AnalyticsModule,
+
     SettlementModule,
-    TransactionsModule,
+
+    TransactionsModule, // Added from feat/transaction-controller-33
+
+    AuthModule,
+
+    HealthModule,
+
+    WebhooksModule,
+
+    SwaggerDocModule,
+
     PublicModule,
+
   ],
+
   controllers: [AppController],
+
   providers: [AppService],
+
 })
+
 export class AppModule implements NestModule {
+
   configure(consumer: MiddlewareConsumer) {
+
     consumer.apply(RequestIdMiddleware).forRoutes('*');
+
   }
+
 }
