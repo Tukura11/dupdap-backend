@@ -17,6 +17,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 import { NotificationModule } from './notification/notification.module';
 import { AuthModule } from './auth/auth.module';
 import { PublicModule } from './public/public.module';
+import { PaymentRequestModule } from './payment-request/payment-request.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 
 @Module({
@@ -50,6 +51,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     WebhooksModule,
     SwaggerDocModule,
     PublicModule,
+    PaymentRequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],
