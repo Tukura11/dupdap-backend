@@ -8,6 +8,7 @@ import {
   HealthCheck,
 } from '@nestjs/terminus';
 import { BlockchainHealthIndicator } from '../indicators/blockchain.health';
+import { RedisHealthIndicator } from '../indicators/redis.health';
 import { GlobalConfigService } from '../../config/global-config.service';
 
 @Injectable()
@@ -19,6 +20,7 @@ export class HealthService {
     private disk: DiskHealthIndicator,
     private memory: MemoryHealthIndicator,
     private blockchain: BlockchainHealthIndicator,
+    private redisIndicator: RedisHealthIndicator,
     private configService: GlobalConfigService,
   ) {}
 
@@ -31,7 +33,7 @@ export class HealthService {
   async checkReadiness() {
     return this.health.check([
       () => this.db.pingCheck('database'),
-       // Redis check can be added here if needed, or via MicroserviceHealthIndicator if using Redis transport
+      () => this.redisIndicator.isHealthy('redis'),
     ]);
   }
 
@@ -46,6 +48,7 @@ export class HealthService {
       () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024),
       () => this.disk.checkStorage('storage', { path: '/', thresholdPercent: 0.9 }),
       () => this.blockchain.isHealthy('blockchain_rpc'),
+      () => this.redisIndicator.isHealthy('redis'),
       // Example external API check if URL exists
       // () => this.http.pingCheck('partner_api', 'https://partner-api.com'),
     ]);

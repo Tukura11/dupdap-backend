@@ -13,8 +13,8 @@
 
     "strict": true,
     "strictPropertyInitialization": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
 
     "baseUrl": "./",
