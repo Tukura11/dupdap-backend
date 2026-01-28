@@ -18,6 +18,7 @@ import { NotificationModule } from './notification/notification.module';
 import { AuthModule } from './auth/auth.module';
 import { PublicModule } from './public/public.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { EVMModule } from './evm/evm.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     WebhooksModule,
     SwaggerDocModule,
     PublicModule,
+    EVMModule,
   ],
   controllers: [AppController],
   providers: [AppService],
