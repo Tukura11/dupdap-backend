@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -22,6 +23,15 @@ async function bootstrap() {
 
   // Global validation pipe
   app.useGlobalPipes(new CustomValidationPipe());
+
+  // Swagger Setup
+  const config = new DocumentBuilder()
+    .setTitle('Transaction API')
+    .setDescription('API for managing and querying transactions')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   // Enable CORS for public access
   app.enableCors();
