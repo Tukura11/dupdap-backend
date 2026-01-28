@@ -21,6 +21,7 @@ import { GlobalConfigService } from './config/global-config.service';
 import { BlockchainModule } from './blockchain/blockchain.module';
 import { AuthModule } from './auth/auth.module';
 import { PublicModule } from './public/public.module';
+import { PaymentRequestModule } from './payment-request/payment-request.module';
 // Middleware
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { EVMModule } from './evm/evm.module';
@@ -59,6 +60,7 @@ import { EVMModule } from './evm/evm.module';
     WebhooksModule,
     PublicModule,
     EVMModule,
+    PaymentRequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],
