@@ -55,9 +55,7 @@ export class MerchantService {
     return this.merchantRepository.save(merchant);
   }
 
-  async login(
-    dto: LoginMerchantDto,
-  ): Promise<{
+  async login(dto: LoginMerchantDto): Promise<{
     accessToken: string;
     refreshToken: string;
     merchant: Merchant;
