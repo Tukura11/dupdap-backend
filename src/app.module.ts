@@ -8,10 +8,9 @@ import { AppService } from './app.service';
 // Config & Core Modules
 import { GlobalConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
-import { CacheModule } from './cache/cache.module';
-import { LoggerModule } from './logger/logger.module';
-// Feature Modules
+import { CacheModule } from '@nestjs/cache-manager';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { LoggerModule } from './logger/logger.module';
 import { SettlementModule } from './settlement/settlement.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { HealthModule } from './health/health.module';
@@ -25,13 +24,14 @@ import { PaymentRequestModule } from './payment-request/payment-request.module';
 // Middleware
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { EVMModule } from './evm/evm.module';
-
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { MerchantModule } from './merchant/merchant.module';
 
 @Module({
   imports: [
     GlobalConfigModule,
     DatabaseModule,
-    CacheModule,
+    CacheModule.register({ isGlobal: true }),
     LoggerModule,
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
@@ -61,11 +61,12 @@ import { EVMModule } from './evm/evm.module';
     PublicModule,
     EVMModule,
     PaymentRequestModule,
+    MonitoringModule,
+    MerchantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(RequestIdMiddleware).forRoutes('*');

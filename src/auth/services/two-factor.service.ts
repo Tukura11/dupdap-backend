@@ -12,8 +12,14 @@ export class TwoFactorService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async generateSecret(userId: string): Promise<{ secret: string; qrCode: string }> {
+  async generateSecret(
+    userId: string,
+  ): Promise<{ secret: string; qrCode: string }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
 
     const secret = speakeasy.generateSecret({
       name: `Settlement API (${user.email})`,
@@ -21,7 +27,12 @@ export class TwoFactorService {
       length: 32,
     });
 
-    const qrCode = await qrcode.toDataURL(secret.otpauth_url);
+    const otpauthUrl = secret.otpauth_url;
+    if (!otpauthUrl) {
+      throw new Error('Failed to generate OTP URL');
+    }
+
+    const qrCode = await qrcode.toDataURL(otpauthUrl);
 
     return {
       secret: secret.base32,
@@ -29,7 +40,11 @@ export class TwoFactorService {
     };
   }
 
-  async enableTwoFactor(userId: string, secret: string, code: string): Promise<boolean> {
+  async enableTwoFactor(
+    userId: string,
+    secret: string,
+    code: string,
+  ): Promise<boolean> {
     const verified = speakeasy.totp.verify({
       secret,
       encoding: 'base32',
@@ -42,6 +57,9 @@ export class TwoFactorService {
     }
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found');
+    }
     user.twoFactorEnabled = true;
     user.twoFactorSecret = secret;
 
@@ -51,8 +69,11 @@ export class TwoFactorService {
 
   async disableTwoFactor(userId: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found');
+    }
     user.twoFactorEnabled = false;
-    user.twoFactorSecret = null;
+    user.twoFactorSecret = null as any; // Force null for DB clearing
 
     await this.userRepository.save(user);
   }
@@ -60,7 +81,7 @@ export class TwoFactorService {
   async verifyCode(userId: string, code: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
-    if (!user.twoFactorEnabled || !user.twoFactorSecret) {
+    if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
       return false;
     }
 
