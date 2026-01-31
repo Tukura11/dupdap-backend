@@ -27,6 +27,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { EVMModule } from './evm/evm.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { MerchantModule } from './merchant/merchant.module';
+import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { MerchantModule } from './merchant/merchant.module';
     MerchantModule,
     MonitoringModule,
     MerchantModule,
+    ExchangeRateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
