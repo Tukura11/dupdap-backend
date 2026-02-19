@@ -129,7 +129,10 @@ export class Merchant {
   )
   webhookConfigurations!: WebhookConfigurationEntity[];
 
-  @OneToMany(() => require('../../kyc/entities/kyc-verification.entity').KycVerification, (kycVerification: any) => kycVerification.merchant)
+  @OneToMany(
+    () => require('../../kyc/entities/kyc-verification.entity').KycVerification,
+    (kycVerification: any) => kycVerification.merchant,
+  )
   kycVerifications!: any[];
 }
 
@@ -137,24 +140,24 @@ export class Merchant {
  * KYC Document interface
  */
 export interface KycDocument {
-    type: string;
-    fileName: string;
-    fileUrl: string;
-    uploadedAt: Date;
-    status: 'pending' | 'approved' | 'rejected';
-    rejectionReason?: string;
+  type: string;
+  fileName: string;
+  fileUrl: string;
+  uploadedAt: Date;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
 }
 
 /**
  * Notification preferences interface
  */
 export interface NotificationPreferences {
-    emailNotifications: boolean;
-    smsNotifications: boolean;
-    pushNotifications: boolean;
-    paymentReceived: boolean;
-    settlementCompleted: boolean;
-    kycStatusUpdate: boolean;
-    securityAlerts: boolean;
-    marketingEmails: boolean;
+  emailNotifications: boolean;
+  smsNotifications: boolean;
+  pushNotifications: boolean;
+  paymentReceived: boolean;
+  settlementCompleted: boolean;
+  kycStatusUpdate: boolean;
+  securityAlerts: boolean;
+  marketingEmails: boolean;
 }

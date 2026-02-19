@@ -54,9 +54,7 @@ export class KycAdminController {
       },
     },
   })
-  async getVerifications(
-    @Query() query: KycStatusQueryDto,
-  ): Promise<{
+  async getVerifications(@Query() query: KycStatusQueryDto): Promise<{
     data: KycVerificationResponseDto[];
     total: number;
     page: number;
@@ -135,8 +133,13 @@ export class KycAdminController {
   ): Promise<KycAuditLog[]> {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
-    return this.kycAuditService.getComplianceAuditLogs(start, end, limit, offset);
+
+    return this.kycAuditService.getComplianceAuditLogs(
+      start,
+      end,
+      limit,
+      offset,
+    );
   }
 
   @Get('statistics')
@@ -240,7 +243,7 @@ export class KycAdminController {
     // This would generate a comprehensive compliance report
     // For now, returning a placeholder structure
     const reportId = `compliance_${Date.now()}`;
-    
+
     return {
       reportId,
       generatedAt: new Date().toISOString(),

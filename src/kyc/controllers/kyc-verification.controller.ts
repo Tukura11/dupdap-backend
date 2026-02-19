@@ -81,7 +81,9 @@ export class KycVerificationController {
     status: HttpStatus.NOT_FOUND,
     description: 'No KYC verification found',
   })
-  async getMerchantVerification(@Request() req: any): Promise<KycVerificationResponseDto | null> {
+  async getMerchantVerification(
+    @Request() req: any,
+  ): Promise<KycVerificationResponseDto | null> {
     return this.kycVerificationService.getMerchantVerification(req.user.id);
   }
 
@@ -102,7 +104,10 @@ export class KycVerificationController {
     @Request() req: any,
     @Param('id') verificationId: string,
   ): Promise<KycVerificationResponseDto> {
-    return this.kycVerificationService.getVerification(verificationId, req.user.id);
+    return this.kycVerificationService.getVerification(
+      verificationId,
+      req.user.id,
+    );
   }
 
   @Put('verifications/:id')

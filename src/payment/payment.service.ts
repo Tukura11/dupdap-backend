@@ -22,7 +22,7 @@ export class PaymentService {
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
     private readonly metrics: PaymentMetrics,
-  ) { }
+  ) {}
 
   async createPayment(
     createPaymentDto: CreatePaymentDto,

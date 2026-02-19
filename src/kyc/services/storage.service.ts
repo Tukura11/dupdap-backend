@@ -15,7 +15,8 @@ export class StorageService {
   private readonly region: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || 'kyc-documents';
+    this.bucketName =
+      this.configService.get<string>('AWS_S3_BUCKET_NAME') || 'kyc-documents';
     this.region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
     // TODO: Implement actual AWS S3 client initialization with @aws-sdk/client-s3
   }
@@ -36,7 +37,10 @@ export class StorageService {
       };
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Failed to upload file ${filePath}: ${err?.message}`, err?.stack);
+      this.logger.error(
+        `Failed to upload file ${filePath}: ${err?.message}`,
+        err?.stack,
+      );
       throw new Error(`File upload failed: ${err?.message}`);
     }
   }
@@ -47,7 +51,10 @@ export class StorageService {
       return Buffer.alloc(0);
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Failed to download file ${filePath}: ${err?.message}`, err?.stack);
+      this.logger.error(
+        `Failed to download file ${filePath}: ${err?.message}`,
+        err?.stack,
+      );
       throw new Error(`File download failed: ${err?.message}`);
     }
   }
@@ -57,17 +64,26 @@ export class StorageService {
       this.logger.log(`File deletion queued: ${filePath}`);
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Failed to delete file ${filePath}: ${err?.message}`, err?.stack);
+      this.logger.error(
+        `Failed to delete file ${filePath}: ${err?.message}`,
+        err?.stack,
+      );
       throw new Error(`File deletion failed: ${err?.message}`);
     }
   }
 
-  async getSignedUrl(filePath: string, expiresIn: number = 3600): Promise<string> {
+  async getSignedUrl(
+    filePath: string,
+    expiresIn: number = 3600,
+  ): Promise<string> {
     try {
       return `s3://${this.bucketName}/${filePath}`;
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Failed to generate signed URL for ${filePath}: ${err?.message}`, err?.stack);
+      this.logger.error(
+        `Failed to generate signed URL for ${filePath}: ${err?.message}`,
+        err?.stack,
+      );
       throw new Error(`Signed URL generation failed: ${err?.message}`);
     }
   }
@@ -91,7 +107,10 @@ export class StorageService {
       return {};
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Failed to get file metadata for ${filePath}: ${err?.message}`, err?.stack);
+      this.logger.error(
+        `Failed to get file metadata for ${filePath}: ${err?.message}`,
+        err?.stack,
+      );
       throw new Error(`File metadata retrieval failed: ${err?.message}`);
     }
   }
@@ -100,13 +119,14 @@ export class StorageService {
     const algorithm = 'aes-256-cbc';
     const key = this.getEncryptionKey();
     const iv = crypto.randomBytes(16);
-    
-    const cipher = crypto.createCipheriv(algorithm, Buffer.from(key, 'hex').subarray(0, 32), iv);
-    
-    const encrypted = Buffer.concat([
-      cipher.update(buffer),
-      cipher.final(),
-    ]);
+
+    const cipher = crypto.createCipheriv(
+      algorithm,
+      Buffer.from(key, 'hex').subarray(0, 32),
+      iv,
+    );
+
+    const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
 
     return Buffer.concat([iv, encrypted]);
   }
@@ -114,16 +134,17 @@ export class StorageService {
   private decryptFile(encryptedBuffer: Buffer): Buffer {
     const algorithm = 'aes-256-cbc';
     const key = this.getEncryptionKey();
-    
+
     const iv = encryptedBuffer.slice(0, 16);
     const encrypted = encryptedBuffer.slice(16);
-    
-    const decipher = crypto.createDecipheriv(algorithm, Buffer.from(key, 'hex').subarray(0, 32), iv);
-    
-    return Buffer.concat([
-      decipher.update(encrypted),
-      decipher.final(),
-    ]);
+
+    const decipher = crypto.createDecipheriv(
+      algorithm,
+      Buffer.from(key, 'hex').subarray(0, 32),
+      iv,
+    );
+
+    return Buffer.concat([decipher.update(encrypted), decipher.final()]);
   }
 
   private getEncryptionKey(): string {

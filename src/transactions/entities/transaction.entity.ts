@@ -59,16 +59,34 @@ export class Transaction {
   @Column({ name: 'crypto_amount', type: 'decimal', precision: 36, scale: 18 })
   cryptoAmount!: string;
 
-  @Column({ name: 'amount', type: 'decimal', precision: 36, scale: 18, nullable: true })
+  @Column({
+    name: 'amount',
+    type: 'decimal',
+    precision: 36,
+    scale: 18,
+    nullable: true,
+  })
   amount?: string;
 
   @Column({ name: 'currency', type: 'varchar', length: 10, default: 'USD' })
   currency!: string;
 
-  @Column({ name: 'usd_value', type: 'decimal', precision: 18, scale: 2, nullable: true })
+  @Column({
+    name: 'usd_value',
+    type: 'decimal',
+    precision: 18,
+    scale: 2,
+    nullable: true,
+  })
   usdValue!: number;
 
-  @Column({ name: 'fiat_amount', type: 'decimal', precision: 18, scale: 2, nullable: true })
+  @Column({
+    name: 'fiat_amount',
+    type: 'decimal',
+    precision: 18,
+    scale: 2,
+    nullable: true,
+  })
   fiatAmount!: number;
 
   // --- CONFIRMATIONS ---
@@ -82,7 +100,13 @@ export class Transaction {
   requiredConfirmations!: number;
 
   // --- GAS & RECEIPTS ---
-  @Column({ name: 'fee_amount', type: 'decimal', precision: 36, scale: 18, nullable: true })
+  @Column({
+    name: 'fee_amount',
+    type: 'decimal',
+    precision: 36,
+    scale: 18,
+    nullable: true,
+  })
   feeAmount!: string;
 
   @Column({ type: 'jsonb', nullable: true })
