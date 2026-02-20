@@ -1,17 +1,54 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { Transaction } from './entities/transaction.entity';
+import { TransactionStatusHistory } from './entities/transaction-status-history.entity';
 import { TransactionQueryDto } from './dto/transaction-query.dto';
+import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
+import { Settlement } from '../settlement/entities/settlement.entity';
+import { WebhookDeliveryLogEntity } from '../database/entities/webhook-delivery-log.entity';
 import * as puppeteer from 'puppeteer';
 import { Readable } from 'stream';
+
+/** Maps known chain identifiers to their block explorer base URLs */
+const EXPLORER_BASE_URLS: Record<string, string> = {
+  base: 'https://basescan.org/tx',
+  ethereum: 'https://etherscan.io/tx',
+  eth: 'https://etherscan.io/tx',
+  polygon: 'https://polygonscan.com/tx',
+  matic: 'https://polygonscan.com/tx',
+  stellar: 'https://stellar.expert/explorer/public/tx',
+  stacks: 'https://explorer.hiro.so/txid',
+  bsc: 'https://bscscan.com/tx',
+  arbitrum: 'https://arbiscan.io/tx',
+  optimism: 'https://optimistic.etherscan.io/tx',
+};
+
+function buildExplorerUrl(chain: string, txHash: string): string | undefined {
+  const base = EXPLORER_BASE_URLS[chain?.toLowerCase()];
+  if (!base) return undefined;
+  return `${base}/${txHash}`;
+}
 
 @Injectable()
 export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
-  ) {}
+    @InjectRepository(TransactionStatusHistory)
+    private statusHistoryRepository: Repository<TransactionStatusHistory>,
+    @InjectRepository(Settlement)
+    private settlementRepository: Repository<Settlement>,
+    @InjectRepository(WebhookDeliveryLogEntity)
+    private webhookLogRepository: Repository<WebhookDeliveryLogEntity>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) { }
 
   async findAll(query: TransactionQueryDto) {
     const {
@@ -20,7 +57,6 @@ export class TransactionsService {
       startDate,
       endDate,
       minAmount,
-      maxAmount,
       page,
       limit,
       sortBy,
@@ -48,9 +84,6 @@ export class TransactionsService {
     if (minAmount) {
       where.amount = MoreThanOrEqual(minAmount);
     }
-    // Note: range query for amount might need raw query if using string decimal column in a complex way,
-    // but TypeORM handles basic comparisons well if configured or if we cast.
-    // For now, assuming basic TypeORM behavior works or amount is castable.
 
     const [items, total] = await this.transactionRepository.findAndCount({
       where,
@@ -83,6 +116,151 @@ export class TransactionsService {
     return transaction;
   }
 
+  async getDetail(id: string): Promise<TransactionDetailResponseDto> {
+    const cacheKey = `cache:transaction:${id}`;
+    const cached = await this.cacheManager.get<TransactionDetailResponseDto>(cacheKey);
+    if (cached) return cached;
+
+    // Fetch transaction with merchant relation via paymentRequest
+    const tx = await this.transactionRepository.findOne({
+      where: { id },
+      relations: ['paymentRequest', 'paymentRequest.merchant'],
+    });
+    if (!tx) throw new NotFoundException(`Transaction with ID ${id} not found`);
+
+    const paymentRequest = tx.paymentRequest;
+    const merchant = paymentRequest?.merchant;
+
+    // Parallel fetch: status history, settlement, webhooks
+    const [statusHistory, settlement, webhooks] = await Promise.all([
+      this.statusHistoryRepository.find({
+        where: { transactionId: id },
+        order: { at: 'ASC' },
+      }),
+      paymentRequest
+        ? this.settlementRepository.findOne({ where: { paymentRequestId: paymentRequest.id } })
+        : Promise.resolve(null),
+      paymentRequest
+        ? this.webhookLogRepository.find({
+          where: { paymentRequestId: paymentRequest.id },
+          order: { createdAt: 'ASC' },
+        })
+        : Promise.resolve([]),
+    ]);
+
+    // If no status history rows exist yet, fall back to paymentRequest.statusHistory
+    const statusHistoryItems =
+      statusHistory.length > 0
+        ? statusHistory.map((h) => ({ status: h.status, at: h.at, reason: h.reason }))
+        : (paymentRequest?.statusHistory ?? []).map((h) => ({
+          status: h.status,
+          at: new Date(h.timestamp),
+          reason: h.reason,
+        }));
+
+    // --- On-chain block ---
+    const usdAmount = tx.usdValue != null ? String(tx.usdValue) : tx.fiatAmount != null ? String(tx.fiatAmount) : '0.00';
+    const networkFeeUsd = tx.networkFeeUsd != null ? String(tx.networkFeeUsd) : '0.000';
+    const exchangeRate = tx.exchangeRate != null ? String(tx.exchangeRate) : '1.0000';
+
+    const onChain = {
+      txHash: tx.txHash,
+      chain: tx.network,
+      blockNumber: tx.blockNumber,
+      confirmations: tx.confirmations,
+      tokenAddress: tx.tokenAddress,
+      tokenSymbol: tx.tokenSymbol,
+      tokenAmount: tx.cryptoAmount,
+      fromAddress: tx.fromAddress,
+      toAddress: tx.toAddress,
+      gasUsed: tx.gasUsed,
+      gasPriceGwei: tx.gasPriceGwei,
+      networkFeeEth: tx.networkFeeEth,
+      networkFeeUsd,
+      explorerUrl: buildExplorerUrl(tx.network, tx.txHash),
+    };
+
+    // --- Valuation block ---
+    const valuation = {
+      usdAmount,
+      exchangeRate,
+      valuedAt: tx.valuedAt ?? tx.confirmedAt ?? tx.blockTimestamp,
+    };
+
+    // --- Fee breakdown ---
+    const feeStructure = (merchant as any)?.feeStructure;
+    const platformFeePercentage = feeStructure?.transactionFeePercentage ?? '1.50';
+    const platformFeeFlat = feeStructure?.transactionFeeFlat ?? '0.30';
+
+    const usdNum = parseFloat(usdAmount) || 0;
+    const netFeeNum = parseFloat(networkFeeUsd) || 0;
+    const pctFeeNum = (parseFloat(platformFeePercentage) / 100) * usdNum;
+    const flatFeeNum = parseFloat(platformFeeFlat) || 0;
+    const platformFeeUsd = (pctFeeNum + flatFeeNum).toFixed(3);
+    const totalFeeUsd = (pctFeeNum + flatFeeNum + netFeeNum).toFixed(3);
+    const merchantPayoutUsd = (usdNum - parseFloat(totalFeeUsd)).toFixed(3);
+
+    const fees = {
+      platformFeePercentage,
+      platformFeeFlat,
+      platformFeeUsd,
+      networkFeeUsd,
+      totalFeeUsd,
+      merchantPayoutUsd,
+    };
+
+    // --- Settlement block ---
+    const settlementDto = settlement
+      ? {
+        id: settlement.id,
+        batchId: settlement.batchId,
+        fiatAmount: String(settlement.netAmount ?? settlement.amount),
+        currency: settlement.currency,
+        exchangeRateUsed: String(settlement.exchangeRate ?? '1.0000'),
+        settledAt: settlement.settledAt,
+        bankTransferReference: settlement.settlementReference ?? settlement.providerReference,
+      }
+      : undefined;
+
+    // --- Webhooks block ---
+    const webhookDtos = (webhooks as WebhookDeliveryLogEntity[]).map((w) => ({
+      id: w.id,
+      event: w.event,
+      deliveredAt: w.deliveredAt,
+      statusCode: w.httpStatusCode,
+      responseTimeMs: w.responseTimeMs,
+      attempts: w.attemptNumber,
+    }));
+
+    const result: TransactionDetailResponseDto = {
+      id: tx.id,
+      merchant: merchant
+        ? {
+          id: merchant.id,
+          businessName: (merchant as any).businessName ?? merchant.name,
+          email: merchant.email,
+        }
+        : { id: paymentRequest?.merchantId ?? '', businessName: '', email: '' },
+      onChain,
+      valuation,
+      fees,
+      status: tx.status,
+      statusHistory: statusHistoryItems,
+      settlement: settlementDto,
+      webhooks: webhookDtos,
+      adminActions: [],
+      metadata: paymentRequest?.metadata,
+      failureReason: tx.failureReason ?? tx.errorMessage,
+      confirmedAt: tx.confirmedAt,
+      settledAt: tx.settledAt ?? settlement?.settledAt,
+      createdAt: tx.createdAt,
+    };
+
+    // Cache for 30 seconds
+    await this.cacheManager.set(cacheKey, result, 30000);
+    return result;
+  }
+
   async findByHash(txHash: string): Promise<Transaction> {
     const transaction = await this.transactionRepository.findOne({
       where: { txHash },
@@ -95,8 +273,6 @@ export class TransactionsService {
 
   async getConfirmations(id: string): Promise<{ confirmations: number }> {
     const transaction = await this.findOne(id);
-    // In a real generic implementation, this would query a blockchain node or indexer.
-    // For now, we simply return the stored confirmations or calculate based on current block height if available.
     return { confirmations: transaction.confirmations };
   }
 
@@ -104,7 +280,6 @@ export class TransactionsService {
     query: TransactionQueryDto,
     format: 'csv' | 'pdf',
   ): Promise<Readable | Buffer> {
-    // Override pagination for export - get all matching or a large limit
     const exportQuery = { ...query, page: 1, limit: 10000 };
     const { items } = await this.findAll(exportQuery);
 
@@ -165,8 +340,8 @@ export class TransactionsService {
           </thead>
           <tbody>
             ${transactions
-              .map(
-                (t) => `
+        .map(
+          (t) => `
               <tr>
                 <td>${t.createdAt.toISOString()}</td>
                 <td>${t.network}</td>
@@ -176,8 +351,8 @@ export class TransactionsService {
                 <td>${t.status}</td>
               </tr>
             `,
-              )
-              .join('')}
+        )
+        .join('')}
           </tbody>
         </table>
       </body>
@@ -186,10 +361,7 @@ export class TransactionsService {
 
     await page.setContent(htmlContent);
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
-
     await browser.close();
-
-    // Convert Uint8Array to Buffer (Puppeteer returns Uint8Array in newer versions)
     return Buffer.from(pdfBuffer);
   }
 }
