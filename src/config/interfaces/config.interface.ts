@@ -18,6 +18,9 @@ export interface DatabaseConfig {
 export interface RedisConfig {
   host: string;
   port: number;
+  password?: string;
+  db?: number;
+  keyPrefix?: string;
 }
 
 export interface BlockchainConfig {

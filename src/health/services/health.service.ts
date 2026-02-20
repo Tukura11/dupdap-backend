@@ -8,7 +8,7 @@ import {
   HealthCheck,
 } from '@nestjs/terminus';
 import { BlockchainHealthIndicator } from '../indicators/blockchain.health';
-import { RedisHealthIndicator } from '../indicators/redis.health';
+import { RedisHealthIndicator } from '../../common/redis';
 import { GlobalConfigService } from '../../config/global-config.service';
 
 @Injectable()
