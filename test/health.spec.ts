@@ -1,16 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { HealthModule } from '../src/health/health.module';
 import { GlobalConfigModule } from '../src/config/config.module';
-import { JwtGuard } from '../src/auth/guards/jwt.guard'; // I will check this path next
-
+import { JwtGuard } from '../src/auth/guards/jwt.guard';
 import { BlockchainHealthIndicator } from '../src/health/indicators/blockchain.health';
-import { RedisHealthIndicator } from '../src/health/indicators/redis.health';
+import { RedisHealthIndicator } from '../src/common/redis';
 import { TypeOrmHealthIndicator } from '@nestjs/terminus';
 
 // Mock dependencies to avoid actual external connections in test
 jest.mock('../src/database/database.module');
+
+// Mock Redis module to avoid real Redis connection in health e2e (jest hoists mocks)
+jest.mock('../src/common/redis/redis.module', () => {
+  const { Module } = require('@nestjs/common');
+  const { CacheModule } = require('@nestjs/cache-manager');
+  const { REDIS_CLIENT } = require('../src/common/redis/inject-redis.decorator');
+  const { RedisService } = require('../src/common/redis/redis.service');
+  const { RedisHealthIndicator } = require('../src/common/redis/redis.health');
+  @Module({
+    imports: [CacheModule.register({ isGlobal: true })],
+    providers: [
+      { provide: REDIS_CLIENT, useValue: { ping: () => Promise.resolve('PONG') } },
+      { provide: RedisService, useValue: {} },
+      {
+        provide: RedisHealthIndicator,
+        useValue: { isHealthy: () => Promise.resolve({ redis: { status: 'up' } }) },
+      },
+    ],
+    exports: [REDIS_CLIENT, RedisService, RedisHealthIndicator, CacheModule],
+  })
+  class MockRedisModule {}
+  return { RedisModule: MockRedisModule };
+});
 
 describe('HealthController (e2e)', () => {
   let app: INestApplication;
