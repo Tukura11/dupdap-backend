@@ -25,6 +25,8 @@ import { AuthModule } from './auth/auth.module';
 import { PublicModule } from './public/public.module';
 import { PaymentRequestModule } from './payment-request/payment-request.module';
 import { MerchantModule } from './merchant/merchant.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { KycModule } from './kyc/kyc.module';
 // Middleware & interceptors
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { RequestContextMiddleware } from './common/middleware/request-context.middleware';
@@ -88,6 +90,7 @@ import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
     DashboardModule,
     MonitoringModule,
     MerchantModule,
+    KycModule,
     ExchangeRateModule,
   ],
   controllers: [AppController],
