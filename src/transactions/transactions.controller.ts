@@ -1,18 +1,31 @@
-import { Controller, Get, Param, Query, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Res,
+  HttpStatus,
+} from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { TransactionQueryDto } from './dto/transaction-query.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 import { Readable } from 'stream';
 
 @ApiTags('Transactions')
 @Controller('api/v1/transactions')
 export class TransactionsController {
-  constructor(private readonly transactionsService: TransactionsService) {}
+  constructor(private readonly transactionsService: TransactionsService) { }
 
   @Get()
   @ApiOperation({ summary: 'List all transactions with advanced filtering' })
-  @ApiResponse({ status: 200, description: 'Return list of transactions.' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Return list of transactions.' })
   async findAll(@Query() query: TransactionQueryDto) {
     return this.transactionsService.findAll(query);
   }
@@ -59,10 +72,18 @@ export class TransactionsController {
     return this.transactionsService.findAll(query);
   }
 
+  // --- Parameterised routes MUST be after all literal routes to avoid shadowing ---
+
   @Get(':id')
-  @ApiOperation({ summary: 'Get transaction details' })
-  async findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(id);
+  @ApiOperation({ summary: 'Get full transaction detail' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: TransactionDetailResponseDto,
+    description: 'Full transaction detail including on-chain data, fees, settlement, and webhooks.',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Transaction not found.' })
+  async getDetail(@Param('id') id: string): Promise<TransactionDetailResponseDto> {
+    return this.transactionsService.getDetail(id);
   }
 
   @Get(':id/confirmations')

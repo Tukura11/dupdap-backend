@@ -7,9 +7,11 @@ import {
   Index,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { TransactionStatus, TransactionType } from '../transactions.enums';
 import { PaymentRequest } from '../../database/entities/payment-request.entity';
+import { TransactionStatusHistory } from './transaction-status-history.entity';
 
 @Entity('transactions')
 @Index(['txHash'])
@@ -123,6 +125,36 @@ export class Transaction {
   @Column({ name: 'block_timestamp', type: 'timestamp', nullable: true })
   blockTimestamp!: Date;
 
+  @Column({ name: 'token_address', type: 'varchar', length: 100, nullable: true })
+  tokenAddress?: string;
+
+  @Column({ name: 'token_symbol', type: 'varchar', length: 20, nullable: true })
+  tokenSymbol?: string;
+
+  @Column({ name: 'gas_used', type: 'varchar', length: 50, nullable: true })
+  gasUsed?: string;
+
+  @Column({ name: 'gas_price_gwei', type: 'varchar', length: 50, nullable: true })
+  gasPriceGwei?: string;
+
+  @Column({ name: 'network_fee_eth', type: 'varchar', length: 50, nullable: true })
+  networkFeeEth?: string;
+
+  @Column({ name: 'network_fee_usd', type: 'decimal', precision: 18, scale: 8, nullable: true })
+  networkFeeUsd?: string;
+
+  @Column({ name: 'exchange_rate', type: 'decimal', precision: 18, scale: 8, nullable: true })
+  exchangeRate?: string;
+
+  @Column({ name: 'valued_at', type: 'timestamp', nullable: true })
+  valuedAt?: Date;
+
+  @Column({ name: 'failure_reason', type: 'text', nullable: true })
+  failureReason?: string;
+
+  @Column({ name: 'settled_at', type: 'timestamp', nullable: true })
+  settledAt?: Date;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
@@ -131,4 +163,7 @@ export class Transaction {
 
   @Column({ name: 'confirmed_at', type: 'timestamp', nullable: true })
   confirmedAt!: Date;
+
+  @OneToMany(() => TransactionStatusHistory, (h) => h.transaction)
+  statusHistory!: TransactionStatusHistory[];
 }
