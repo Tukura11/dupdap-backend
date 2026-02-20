@@ -22,9 +22,21 @@ export const RESTRICTED_FOR_SUPPORT_ADMIN = new Set(['analytics:revenue']);
 
 /** Role-to-permissions map for admin users. */
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  [UserRole.ADMIN]: ['analytics:revenue', 'analytics:read'],
-  [UserRole.SUPER_ADMIN]: ['analytics:revenue', 'analytics:read', 'admin:queues'],
-  [UserRole.SUPPORT_ADMIN]: ['analytics:read'],
+  [UserRole.ADMIN]: [
+    'analytics:revenue',
+    'analytics:read',
+    'merchants:write',
+    'risk:manage',
+  ],
+  [UserRole.SUPER_ADMIN]: [
+    'analytics:revenue',
+    'analytics:read',
+    'admin:queues',
+    'merchants:write',
+    'merchants:terminate',
+    'risk:manage',
+  ],
+  [UserRole.SUPPORT_ADMIN]: ['analytics:read', 'risk:manage'],
   [UserRole.MERCHANT]: [],
   [UserRole.USER]: [],
 };
