@@ -29,6 +29,9 @@
     "noImplicitThis": false,
     "incremental": true,
     "skipLibCheck": true,
+    "noEmitOnError": false,
+    "noImplicitThis": false,
+
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
