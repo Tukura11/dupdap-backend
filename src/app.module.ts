@@ -11,7 +11,7 @@ import { AppService } from './app.service';
 // Config & Core Modules
 import { GlobalConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
-import { CacheModule } from '@nestjs/cache-manager';
+import { RedisModule } from './common/redis';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { LoggerModule } from './logger/logger.module';
 import { SettlementModule } from './settlement/settlement.module';
@@ -40,7 +40,7 @@ import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
     // SentryModule.forRoot(), // TODO: Enable when compatible
     GlobalConfigModule,
     DatabaseModule,
-    CacheModule.register({ isGlobal: true }),
+    RedisModule,
     LoggerModule,
     ScheduleModule.forRoot(),
     ThrottlerModule.forRootAsync({
