@@ -16,7 +16,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
-  // Use Winston logger
+  // Use Winston logger (see LoggerModule / logger.config: JSON in production, pretty in development)
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
   // Global exception filters (order matters - more specific first)
