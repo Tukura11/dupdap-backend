@@ -5,9 +5,14 @@ import { MerchantFeeController } from './controllers/merchant-fee.controller';
 import { MerchantService } from './services/merchant.service';
 import { MerchantFeeService } from './services/merchant-fee.service';
 import { MerchantLifecycleController } from './controllers/merchant-lifecycle.controller';
-import { MerchantService } from './services/merchant.service';
 import { MerchantLifecycleService } from './services/merchant-lifecycle.service';
 import { MerchantLifecycleProcessor } from './processors/merchant-lifecycle.processor';
+import { MerchantDocument } from './entities/merchant-document.entity';
+import { DocumentRequest } from './entities/document-request.entity';
+import { MerchantDocumentService } from './services/merchant-document.service';
+import { DocumentRequestService } from './services/document-request.service';
+import { MerchantDocumentController } from './controllers/merchant-document.controller';
+import { AdminDocumentController } from './controllers/admin-document.controller';
 import { Merchant } from '../database/entities/merchant.entity';
 import { AuthModule } from '../auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -25,10 +30,7 @@ import { SuperAdminGuard } from '../auth/guards/super-admin.guard';
 import { MerchantSuspension } from './entities/merchant-suspension.entity';
 import { MerchantTermination } from './entities/merchant-termination.entity';
 import { MerchantFlag } from './entities/merchant-flag.entity';
-import { ApiKey } from '../api-key/entities/api-key.entity';
 import { BullModule } from '@nestjs/bullmq';
-
-
 
 @Module({
   imports: [
@@ -41,19 +43,17 @@ import { BullModule } from '@nestjs/bullmq';
       PlatformFeeDefault,
       PlatformFeeAuditLog,
       UserEntity,
-    ]),
       MerchantSuspension,
       MerchantTermination,
       MerchantFlag,
-      ApiKey,
+      MerchantDocument,
+      DocumentRequest,
     ]),
     BullModule.registerQueue(
       { name: 'settlements' },
       { name: 'notifications' },
     ),
-
-
-    AuthModule, // Assuming we might need auth services like PasswordService if exported, or we replicate logic
+    AuthModule,
     ConfigModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -61,23 +61,35 @@ import { BullModule } from '@nestjs/bullmq';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRATION') ||
-            '1d') as any,
+          expiresIn: (configService.get<string>('JWT_EXPIRATION') || '1d') as any,
           algorithm: 'HS256',
         },
       }),
     }),
   ],
-  controllers: [MerchantController, MerchantFeeController],
-  providers: [MerchantService, MerchantFeeService, MerchantJwtStrategy, SuperAdminGuard],
-  exports: [MerchantService, MerchantFeeService],
-  controllers: [MerchantController, MerchantLifecycleController],
+  controllers: [
+    MerchantController,
+    MerchantFeeController,
+    MerchantLifecycleController,
+    MerchantDocumentController,
+    AdminDocumentController,
+  ],
   providers: [
     MerchantService,
+    MerchantFeeService,
     MerchantLifecycleService,
     MerchantLifecycleProcessor,
     MerchantJwtStrategy,
+    SuperAdminGuard,
+    MerchantDocumentService,
+    DocumentRequestService,
   ],
-  exports: [MerchantService, MerchantLifecycleService],
+  exports: [
+    MerchantService,
+    MerchantFeeService,
+    MerchantLifecycleService,
+    MerchantDocumentService,
+    DocumentRequestService,
+  ],
 })
 export class MerchantModule { }
