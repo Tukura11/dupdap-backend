@@ -1,35 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { AppConfigModule, appConfig, databaseConfig, redisConfig } from './config';
+import { AppConfigModule, appConfig, redisConfig } from './config';
+import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
-    // Config — global, validates all env vars on startup
+    // 1. Config — global, validates all env vars at startup with abortEarly: false.
     AppConfigModule,
 
-    // TypeORM — injecting typed DatabaseConfig
-    TypeOrmModule.forRootAsync({
-      inject: [databaseConfig.KEY, appConfig.KEY],
-      useFactory: (db: ConfigType<typeof databaseConfig>, app: ConfigType<typeof appConfig>) => ({
-        type: 'postgres',
-        host: db.host,
-        port: db.port,
-        username: db.user,
-        password: db.pass,
-        database: db.name,
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
-        synchronize: false,
-        migrationsRun: app.nodeEnv === 'production',
-        logging: app.nodeEnv === 'development',
-      }),
-    }),
+    // 2. Database — owns the TypeORM root connection; see database.module.ts.
+    DatabaseModule,
 
-    // Bull — injecting typed RedisConfig
+    // 3. Bull — async Redis connection via typed RedisConfig.
     BullModule.forRootAsync({
       inject: [redisConfig.KEY],
       useFactory: (redis: ConfigType<typeof redisConfig>) => ({
@@ -41,7 +26,7 @@ import { HealthModule } from './health/health.module';
       }),
     }),
 
-    // Throttler — injecting typed AppConfig
+    // 4. Throttler — rate limiting via typed AppConfig.
     ThrottlerModule.forRootAsync({
       inject: [appConfig.KEY],
       useFactory: (app: ConfigType<typeof appConfig>) => ({
