@@ -1,57 +1,54 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { envValidationSchema } from './config/env.validation';
+import { AppConfigModule, appConfig, databaseConfig, redisConfig } from './config';
 import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
-    // Config — global, validates env on startup
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validationSchema: envValidationSchema,
-      validationOptions: { abortEarly: true },
-    }),
+    // Config — global, validates all env vars on startup
+    AppConfigModule,
 
-    // TypeORM — async so ConfigService is available
+    // TypeORM — injecting typed DatabaseConfig
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [databaseConfig.KEY, appConfig.KEY],
+      useFactory: (db: ConfigType<typeof databaseConfig>, app: ConfigType<typeof appConfig>) => ({
         type: 'postgres',
-        host: config.get<string>('DB_HOST'),
-        port: config.get<number>('DB_PORT'),
-        username: config.get<string>('DB_USERNAME'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_NAME'),
+        host: db.host,
+        port: db.port,
+        username: db.user,
+        password: db.pass,
+        database: db.name,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
-        synchronize: config.get<string>('NODE_ENV') !== 'production',
-        logging: config.get<string>('NODE_ENV') === 'development',
+        synchronize: false,
+        migrationsRun: app.nodeEnv === 'production',
+        logging: app.nodeEnv === 'development',
       }),
     }),
 
-    // Bull — async Redis connection
+    // Bull — injecting typed RedisConfig
     BullModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [redisConfig.KEY],
+      useFactory: (redis: ConfigType<typeof redisConfig>) => ({
         redis: {
-          host: config.get<string>('REDIS_HOST'),
-          port: config.get<number>('REDIS_PORT'),
-          password: config.get<string>('REDIS_PASSWORD') || undefined,
+          host: redis.host,
+          port: redis.port,
+          password: redis.password,
         },
       }),
     }),
 
-    // Throttler — rate limiting
+    // Throttler — injecting typed AppConfig
     ThrottlerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [appConfig.KEY],
+      useFactory: (app: ConfigType<typeof appConfig>) => ({
         throttlers: [
           {
-            ttl: config.get<number>('THROTTLE_TTL', 60) * 1000,
-            limit: config.get<number>('THROTTLE_LIMIT', 100),
+            ttl: app.throttleTtl * 1000,
+            limit: app.throttleLimit,
           },
         ],
       }),

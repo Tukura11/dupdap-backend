@@ -3,6 +3,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import type { AppConfig } from './config';
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
@@ -11,16 +12,12 @@ async function bootstrap(): Promise<void> {
   });
 
   const config = app.get(ConfigService);
-  const port = config.get<number>('PORT', 3000);
-  const apiPrefix = config.get<string>('API_PREFIX', 'api/v1');
+  const port = config.get<AppConfig['port']>('app.port')!;
+  const apiPrefix = config.get<AppConfig['apiPrefix']>('app.apiPrefix')!;
 
-  // CORS
   app.enableCors();
-
-  // Global prefix
   app.setGlobalPrefix(apiPrefix);
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -29,7 +26,6 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // Swagger
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Cheese Backend API')
     .setDescription('API documentation')
