@@ -9,6 +9,11 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { WsModule } from './ws/ws.module';
+import { VirtualAccountModule } from './virtual-account/virtual-account.module';
+import { RatesModule } from './rates/rates.module';
+import { SorobanModule } from './soroban/soroban.module';
+import { DepositsModule } from './deposits/deposits.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -50,6 +55,21 @@ import { WsModule } from './ws/ws.module';
 
     // 6. WebSockets — Socket.io real-time gateway.
     WsModule,
+
+    // 7. Virtual Accounts — Flutterwave integration for NGN deposits.
+    VirtualAccountModule,
+
+    // 8. Rates — Currency conversion rates.
+    RatesModule,
+
+    // 9. Soroban — Stellar smart contract integration.
+    SorobanModule,
+
+    // 10. Deposits — Deposit records.
+    DepositsModule,
+
+    // 11. Transactions — Transaction records.
+    TransactionsModule,
   ],
   providers: [
     // Global guard: every route requires a valid JWT unless decorated @Public().

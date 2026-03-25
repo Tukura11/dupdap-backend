@@ -15,9 +15,11 @@ import { VirtualAccount, VirtualAccountProvider } from './entities/virtual-accou
 import { flutterwaveConfig } from '../config/flutterwave.config';
 import { redisConfig } from '../config/redis.config';
 import { CheeseGateway, WS_EVENTS } from '../ws/cheese.gateway';
+import { RatesService } from '../rates/rates.service';
+import { SorobanService } from '../soroban/soroban.service';
+import { DepositsService } from '../deposits/deposits.service';
 
 const DEDUP_TTL_SECONDS = 172_800; // 48 h
-const NGN_TO_USDC_RATE_KEY = 'rates:NGN_USDC';
 
 @Injectable()
 export class VirtualAccountService {
@@ -37,6 +39,12 @@ export class VirtualAccountService {
     redisCfg: ConfigType<typeof redisConfig>,
 
     private readonly gateway: CheeseGateway,
+
+    private readonly ratesService: RatesService,
+
+    private readonly sorobanService: SorobanService,
+
+    private readonly depositsService: DepositsService,
   ) {
     this.redis = new Redis({
       host: redisCfg.host,
@@ -110,11 +118,23 @@ export class VirtualAccountService {
     }
 
     const ngnAmount = data['amount'] as number;
-    const usdcAmount = await this.convertNgnToUsdc(ngnAmount);
+    const usdcAmount = await this.ratesService.convertNgnToUsdc(ngnAmount);
 
-    // Stub calls — replace with real SorobanService / DepositRepository injections
+    // Create deposit and transaction records
+    await this.depositsService.createDeposit(
+      va.userId,
+      va,
+      ngnAmount,
+      usdcAmount,
+      reference,
+      data['flw_ref'] as string | undefined,
+    );
+
+    // Deposit to Soroban contract
+    await this.sorobanService.deposit(va.userId, usdcAmount);
+
     this.logger.log(
-      `Crediting ${usdcAmount} USDC to user ${va.userId} (${ngnAmount} NGN via ${reference})`,
+      `Credited ${usdcAmount} USDC to user ${va.userId} (${ngnAmount} NGN via ${reference})`,
     );
 
     await this.gateway.emitToUser(va.userId, WS_EVENTS.BALANCE_UPDATED, {
@@ -138,11 +158,5 @@ export class VirtualAccountService {
       crypto.timingSafeEqual(sigBuffer, expBuffer);
 
     if (!valid) throw new UnauthorizedException('Invalid webhook signature');
-  }
-
-  private async convertNgnToUsdc(ngnAmount: number): Promise<number> {
-    const rate = await this.redis.get(NGN_TO_USDC_RATE_KEY);
-    const parsedRate = rate ? parseFloat(rate) : 0.00065; // fallback ~1 NGN = 0.00065 USDC
-    return parseFloat((ngnAmount * parsedRate).toFixed(6));
   }
 }

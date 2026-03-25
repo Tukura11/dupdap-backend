@@ -30,6 +30,12 @@ const mockHttpService = { post: jest.fn() };
 
 const mockGateway = { emitToUser: jest.fn().mockResolvedValue(undefined) };
 
+const mockRatesService = { convertNgnToUsdc: jest.fn() };
+
+const mockSorobanService = { deposit: jest.fn().mockResolvedValue(undefined) };
+
+const mockDepositsService = { createDeposit: jest.fn().mockResolvedValue(undefined) };
+
 const mockFwConfig = {
   secretKey: 'FW-test-key',
   webhookSecret: WEBHOOK_SECRET,
@@ -57,6 +63,9 @@ describe('VirtualAccountService', () => {
         { provide: flutterwaveConfig.KEY, useValue: mockFwConfig },
         { provide: redisConfig.KEY, useValue: mockRedisConfig },
         { provide: CheeseGateway, useValue: mockGateway },
+        { provide: RatesService, useValue: mockRatesService },
+        { provide: SorobanService, useValue: mockSorobanService },
+        { provide: DepositsService, useValue: mockDepositsService },
       ],
     }).compile();
 
@@ -109,13 +118,24 @@ describe('VirtualAccountService', () => {
         reference: 'va_user-1_111',
         provider: VirtualAccountProvider.FLUTTERWAVE,
       });
+      mockRatesService.convertNgnToUsdc.mockResolvedValue(3.25);
 
       await service.handleWebhook(body, sig);
 
+      expect(mockRatesService.convertNgnToUsdc).toHaveBeenCalledWith(5000);
+      expect(mockDepositsService.createDeposit).toHaveBeenCalledWith(
+        'user-1',
+        expect.any(Object),
+        5000,
+        3.25,
+        'va_user-1_111',
+        undefined,
+      );
+      expect(mockSorobanService.deposit).toHaveBeenCalledWith('user-1', 3.25);
       expect(mockGateway.emitToUser).toHaveBeenCalledWith(
         'user-1',
         WS_EVENTS.BALANCE_UPDATED,
-        expect.objectContaining({ ngnAmount: 5000 }),
+        expect.objectContaining({ ngnAmount: 5000, usdcAmount: 3.25 }),
       );
     });
 
@@ -127,6 +147,9 @@ describe('VirtualAccountService', () => {
       await service.handleWebhook(body, sig);
 
       expect(mockVaRepo.findOne).not.toHaveBeenCalled();
+      expect(mockRatesService.convertNgnToUsdc).not.toHaveBeenCalled();
+      expect(mockDepositsService.createDeposit).not.toHaveBeenCalled();
+      expect(mockSorobanService.deposit).not.toHaveBeenCalled();
       expect(mockGateway.emitToUser).not.toHaveBeenCalled();
     });
 
