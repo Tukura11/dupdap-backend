@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { WsModule } from './ws/ws.module';
+import { TierConfigModule } from './tier-config/tier-config.module';
 
 @Module({
   imports: [
@@ -50,6 +51,9 @@ import { WsModule } from './ws/ws.module';
 
     // 6. WebSockets — Socket.io real-time gateway.
     WsModule,
+
+    // 7. Tier Config — membership tiers and limits.
+    TierConfigModule,
   ],
   providers: [
     // Global guard: every route requires a valid JWT unless decorated @Public().
