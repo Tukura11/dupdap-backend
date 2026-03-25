@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import type { AppConfig } from './config';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { version } = require('../package.json') as { version: string };
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
@@ -26,18 +28,20 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Cheese Backend API')
-    .setDescription('API documentation')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('CheesePay API')
+      .setDescription('API documentation for the CheesePay settlement platform')
+      .setVersion(version)
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
+    logger.log(`Swagger docs at http://localhost:${port}/${apiPrefix}/docs`);
+  }
 
   await app.listen(port);
   logger.log(`Application running on http://localhost:${port}/${apiPrefix}`);
-  logger.log(`Swagger docs at http://localhost:${port}/${apiPrefix}/docs`);
 }
 
 bootstrap();
