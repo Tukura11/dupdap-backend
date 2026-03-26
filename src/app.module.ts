@@ -90,7 +90,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ReferralsModule,
     DashboardModule,
     MonitoringModule,
-    MerchantModule,
     ExchangeRateModule,
   ],
   controllers: [AppController],
