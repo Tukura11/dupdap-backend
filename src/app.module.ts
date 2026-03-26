@@ -95,8 +95,6 @@ import { PushModule } from './push/push.module';
     UsersModule,
     BankAccountsModule,
     PayLinkModule,
-    AdminModule,
-
     // 10. SMS — OTP + transaction alerts via Termii + BullMQ.
     SmsModule,
 
