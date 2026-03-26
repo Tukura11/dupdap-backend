@@ -4,6 +4,7 @@ import { ConfigType } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule, appConfig, redisConfig } from './config';
+import { CacheModule } from './cache/cache.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -21,10 +22,13 @@ import { TransactionsModule } from './transactions/transactions.module';
     // 1. Config — global, validates all env vars at startup with abortEarly: false.
     AppConfigModule,
 
-    // 2. Database — owns the TypeORM root connection; see database.module.ts.
+    // 2. Redis cache — global CacheService + ioredis client.
+    CacheModule,
+
+    // 3. Database — owns the TypeORM root connection; see database.module.ts.
     DatabaseModule,
 
-    // 3. Bull — async Redis connection via typed RedisConfig.
+    // 4. Bull — async Redis connection via typed RedisConfig.
     BullModule.forRootAsync({
       inject: [redisConfig.KEY],
       useFactory: (redis: ConfigType<typeof redisConfig>) => ({
@@ -36,7 +40,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       }),
     }),
 
-    // 4. Throttler — rate limiting via typed AppConfig.
+    // 5. Throttler — rate limiting via typed AppConfig.
     ThrottlerModule.forRootAsync({
       inject: [appConfig.KEY],
       useFactory: (app: ConfigType<typeof appConfig>) => ({
@@ -51,7 +55,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 
     HealthModule,
 
-    // 5. Auth — register/login/refresh/logout + global JWT guard.
+    // 6. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
     // 6. File uploads — presign + confirm via Cloudflare R2.
