@@ -21,9 +21,12 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
-    "seed:run": "ts-node src/database/seeds/run-seeds.ts"
+    "seed:run": "ts-node src/database/seeds/run-seeds.ts",
+    "generate:openapi": "ts-node scripts/generate-openapi.ts",
+    "generate:client": "ts-node scripts/generate-client.ts"
   },
   "dependencies": {
+    "@nestjs/axios": "^4.0.0",
     "@nestjs/bull": "^11.0.4",
     "@nestjs/platform-socket.io": "^11.0.1",
     "@nestjs/websockets": "^11.0.1",
@@ -50,6 +53,7 @@
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "stellar-sdk": "^12.2.0",
     "typeorm": "^0.3.28",
     "uuid": "^13.0.0"
   },
