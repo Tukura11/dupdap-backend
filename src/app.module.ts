@@ -21,6 +21,7 @@ import { CorrelationIdMiddleware } from './logging/correlation-id.middleware';
 import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { MerchantsModule } from './merchants/merchants.module';
+import { UsersModule } from './users/users.module';
 import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
 
@@ -85,6 +86,8 @@ import { PayLinkModule } from './paylink/paylink.module';
     WebhooksModule,
 
     MerchantsModule,
+
+    UsersModule,
 
     BankAccountsModule,
 

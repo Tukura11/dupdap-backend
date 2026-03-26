@@ -6,6 +6,14 @@ export enum UserRole {
   USER = 'user',
   MERCHANT = 'merchant',
   ADMIN = 'admin',
+  SUPERADMIN = 'superadmin',
+}
+
+export enum KycStatus {
+  NONE = 'none',
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
 }
 
 @Entity('users')
@@ -19,6 +27,9 @@ export class User extends BaseEntity {
   @Column({ name: 'password_hash', length: 255 })
   passwordHash!: string;
 
+  @Column({ unique: true, length: 20, nullable: true, default: null })
+  phone!: string | null;
+
   @Column({ name: 'display_name', length: 100, nullable: true, default: null })
   displayName!: string | null;
 
@@ -28,6 +39,14 @@ export class User extends BaseEntity {
     default: TierName.SILVER,
   })
   tier!: TierName;
+
+  @Column({
+    name: 'kyc_status',
+    type: 'enum',
+    enum: KycStatus,
+    default: KycStatus.NONE,
+  })
+  kycStatus!: KycStatus;
 
   /** True only for the built-in system admin account. */
   @Column({ name: 'is_admin', default: false })
