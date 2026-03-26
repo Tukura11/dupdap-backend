@@ -18,6 +18,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { LoggingModule } from './logging/logging.module';
 import { CorrelationIdMiddleware } from './logging/correlation-id.middleware';
 import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { RbacModule } from './rbac/rbac.module';
 import { MerchantsModule } from './merchants/merchants.module';
@@ -110,6 +111,10 @@ import { SmsModule } from './sms/sms.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
