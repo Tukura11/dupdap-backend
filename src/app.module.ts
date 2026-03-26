@@ -5,6 +5,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule, appConfig, redisConfig } from './config';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { SorobanModule } from './soroban/soroban.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { HealthModule } from './health/health.module';
     }),
 
     HealthModule,
+    SorobanModule,
   ],
 })
 export class AppModule {}
