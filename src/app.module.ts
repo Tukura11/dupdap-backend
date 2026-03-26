@@ -24,6 +24,10 @@ import { MerchantsModule } from './merchants/merchants.module';
 import { UsersModule } from './users/users.module';
 import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
+import { AuditModule } from './audit/audit.module';
+import { AppConfigModule as RuntimeConfigModule } from './app-config/app-config.module';
+import { MaintenanceModeMiddleware } from './app-config/middleware/maintenance-mode.middleware';
+
 
 @Module({
   imports: [
@@ -92,6 +96,8 @@ import { PayLinkModule } from './paylink/paylink.module';
     BankAccountsModule,
 
     PayLinkModule,
+    AuditModule,
+    RuntimeConfigModule,
   ],
   providers: [
     // Global guard: every route requires a valid JWT unless decorated @Public().
@@ -108,6 +114,7 @@ import { PayLinkModule } from './paylink/paylink.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+    consumer.apply(MaintenanceModeMiddleware).forRoutes('*');
   }
 }
 
