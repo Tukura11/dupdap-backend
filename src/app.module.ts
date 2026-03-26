@@ -40,7 +40,7 @@ import { SmsModule } from './sms/sms.module';
 
     // 4. Bull — async Redis connection via typed RedisConfig.
     BullModule.forRootAsync({
-   t: [redisConfig.KEY],
+      inject: [redisConfig.KEY],
       useFactory: (redis: ConfigType<typeof redisConfig>) => ({
         redis: {
           host: redis.host,
@@ -79,7 +79,9 @@ import { SmsModule } from './sms/sms.module';
     UploadModule,
 
     // 7. WebSockets — Socket.io real-time gateway.
-    WsModul. Notifications — entity + API + realtime delivery.
+    WsModule,
+
+    // 7. Notifications — entity + API + realtime delivery.
     NotificationsModule,
 
     // 8. Webhooks — subscriptions + signed deliveries + retries.
