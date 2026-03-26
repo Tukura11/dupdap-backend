@@ -29,6 +29,9 @@ import { VirtualAccountModule } from './virtual-account/virtual-account.module';
 import { AdminModule } from './admin/admin.module';
 import { EarningsModule } from './earnings/earnings.module';
 import { SmsModule } from './sms/sms.module';
+import { PinModule } from './pin/pin.module';
+import { TransfersModule } from './transfers/transfers.module';
+import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 
 @Module({
   imports: [
@@ -96,6 +99,9 @@ import { SmsModule } from './sms/sms.module';
 
     MerchantsModule,
     UsersModule,
+    PinModule,
+    TransfersModule,
+    WithdrawalsModule,
     BankAccountsModule,
     VirtualAccountModule,
     PayLinkModule,

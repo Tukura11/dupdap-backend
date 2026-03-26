@@ -13,11 +13,13 @@ import { PayLinkController } from './paylink.controller';
 import { PayLink } from './entities/pay-link.entity';
 import { EXPIRE_PAYLINKS_JOB, PAYLINK_QUEUE, PayLinkProcessor } from './paylink.processor';
 import { PayLinkService } from './paylink.service';
+import { PinModule } from '../pin/pin.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PayLink, User, Merchant, Transaction]),
     BullModule.registerQueue({ name: PAYLINK_QUEUE }),
+    PinModule,
     SorobanModule,
     WsModule,
     EmailModule,
