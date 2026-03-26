@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigType } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -6,6 +7,9 @@ import { AppConfigModule, appConfig, redisConfig } from './config';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { SorobanModule } from './soroban/soroban.module';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { WsModule } from './ws/ws.module';
 
 @Module({
   imports: [
@@ -42,6 +46,20 @@ import { SorobanModule } from './soroban/soroban.module';
 
     HealthModule,
     SorobanModule,
+
+    // 5. Auth — register/login/refresh/logout + global JWT guard.
+    AuthModule,
+
+    // 6. WebSockets — Socket.io real-time gateway.
+    WsModule,
+  ],
+  providers: [
+    // Global guard: every route requires a valid JWT unless decorated @Public().
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {}
+
