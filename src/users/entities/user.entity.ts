@@ -1,5 +1,6 @@
 import { Entity, Column } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
+import { Role } from '../../rbac/rbac.types';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -22,6 +23,9 @@ export class User extends BaseEntity {
   /** True only for the fee-treasury wallet user (system account). */
   @Column({ name: 'is_treasury', default: false })
   isTreasury!: boolean;
+
+  @Column({ type: 'enum', enum: Role, default: Role.User })
+  role!: Role;
 
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;

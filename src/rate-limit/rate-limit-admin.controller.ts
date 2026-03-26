@@ -4,10 +4,16 @@ import {
   Get,
   NotFoundException,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { IpBlockService } from './ip-block.service';
+import { Roles } from '../rbac/decorators/roles.decorator';
+import { Role } from '../rbac/rbac.types';
+import { RolesGuard } from '../rbac/guards/roles.guard';
 
 @Controller('admin/rate-limits')
+@UseGuards(RolesGuard)
+@Roles(Role.Admin, Role.SuperAdmin)
 export class RateLimitAdminController {
   constructor(private readonly ipBlockService: IpBlockService) {}
 

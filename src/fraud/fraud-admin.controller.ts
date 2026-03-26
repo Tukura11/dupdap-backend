@@ -13,6 +13,10 @@ import { QueryFlagsDto } from './dto/query-flags.dto';
 import { ResolveFlagDto } from './dto/resolve-flag.dto';
 import { FraudFlag } from './entities/fraud-flag.entity';
 import { Logger } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
+import { Roles } from '../rbac/decorators/roles.decorator';
+import { Role } from '../rbac/rbac.types';
+import { RolesGuard } from '../rbac/guards/roles.guard';
 
 /** Stub ports — replace with real injected services when available */
 class StubUserFreezePort implements UserFreezePort {
@@ -30,6 +34,8 @@ class StubAuditLogPort implements AuditLogPort {
 }
 
 @Controller('admin/fraud')
+@UseGuards(RolesGuard)
+@Roles(Role.Admin, Role.SuperAdmin)
 export class FraudAdminController {
   constructor(private readonly fraudService: FraudService) {}
 

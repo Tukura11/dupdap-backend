@@ -15,6 +15,7 @@ import { LoggingModule } from './logging/logging.module';
 import { CorrelationIdMiddleware } from './logging/correlation-id.middleware';
 import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { RbacModule } from './rbac/rbac.module';
 
 @Module({
   imports: [
@@ -65,6 +66,9 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 
     // 8. Webhooks — subscriptions + signed deliveries + retries.
     WebhooksModule,
+
+    // 9. RBAC — roles + permissions for admin routes.
+    RbacModule,
   ],
   providers: [
     // Global guard: every route requires a valid JWT unless decorated @Public().
