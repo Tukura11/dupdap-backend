@@ -14,6 +14,7 @@ import { SessionService } from './session.service';
 import { TwoFactorService } from './two-factor.service';
 import { v4 as uuidv4 } from 'uuid';
 import { LoginDto, RegisterDto, RefreshTokenDto } from '../dto/auth.dto';
+import { ReferralService } from '../../referrals/referral.service';
 
 @Injectable()
 export class AuthService {
@@ -26,16 +27,21 @@ export class AuthService {
     private readonly passwordService: PasswordService,
     private readonly sessionService: SessionService,
     private readonly twoFactorService: TwoFactorService,
+    private readonly referralService: ReferralService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<UserEntity> {
-    const { email, password, firstName, lastName } = registerDto;
+    const { email, password, firstName, lastName, referralCode } = registerDto;
 
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
+    }
+
+    if (referralCode) {
+      await this.referralService.assertReferralCodeExists(referralCode);
     }
 
     const hashedPassword = await this.passwordService.hashPassword(password);
@@ -51,7 +57,13 @@ export class AuthService {
       isActive: true,
     });
 
-    return this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+
+    if (referralCode) {
+      await this.referralService.trackSignup(referralCode, savedUser.id);
+    }
+
+    return savedUser;
   }
 
   async login(

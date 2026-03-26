@@ -15,6 +15,7 @@ import { PaymentDetailsDto } from './dto/payment-details.dto';
 import { PaymentListDto } from './dto/payment-list.dto';
 import { PaymentFiltersDto } from './dto/payment-filters.dto';
 import { PaymentReceiptDto } from './dto/payment-receipt.dto';
+import { ReferralService } from '../referrals/referral.service';
 
 @Injectable()
 export class PaymentService {
@@ -22,6 +23,7 @@ export class PaymentService {
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
     private readonly metrics: PaymentMetrics,
+    private readonly referralService: ReferralService,
   ) {}
 
   async createPayment(
@@ -188,6 +190,9 @@ export class PaymentService {
 
       if (data.status === PaymentStatus.COMPLETED) {
         this.metrics.incrementPaymentProcessed(payment.currency || 'USD');
+        if (data.userId) {
+          await this.referralService.trackConversion(data.userId);
+        }
       } else if (data.status === PaymentStatus.FAILED) {
         this.metrics.incrementPaymentFailed(
           payment.currency || 'USD',

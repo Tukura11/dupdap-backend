@@ -6,9 +6,13 @@ import { PaymentRequest } from '../database/entities/payment-request.entity';
 import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { PaymentMetrics } from './payment.metrics';
+import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment, PaymentRequest])],
+  imports: [
+    TypeOrmModule.forFeature([Payment, PaymentRequest]),
+    ReferralsModule,
+  ],
   controllers: [PaymentController],
   providers: [
     PaymentService,

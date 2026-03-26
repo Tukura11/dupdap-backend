@@ -2,6 +2,8 @@ export interface AppConfig {
   nodeEnv: string;
   port: number;
   debug: boolean;
+  referralRewardAmountUsdc: string;
+  referralTreasuryAddress?: string;
 }
 
 export interface DatabaseConfig {

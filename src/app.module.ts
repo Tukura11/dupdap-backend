@@ -34,6 +34,8 @@ import { EVMModule } from './evm/evm.module';
 import { StellarModule } from './stellar/stellar.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
+import { ReferralsModule } from './referrals/referrals.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 // TODO: Enable Sentry when @sentry/nestjs module is compatible
 // import { SentryModule } from '@sentry/nestjs';
@@ -85,6 +87,7 @@ import { ExchangeRateModule } from './exchange-rate/exchange-rate.module';
     EVMModule,
     PaymentRequestModule,
     MerchantModule,
+    ReferralsModule,
     DashboardModule,
     MonitoringModule,
     MerchantModule,

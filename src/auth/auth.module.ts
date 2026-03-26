@@ -23,12 +23,14 @@ import { ApiKeyService } from './services/api-key.service';
 import { JwtGuard } from './guards/jwt.guard';
 import { AdminJwtGuard } from './guards/admin-jwt.guard';
 import { RequirePermissionGuard } from './guards/require-permission.guard';
+import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
   imports: [
+    ReferralsModule,
     TypeOrmModule.forFeature([
-      UserEntity, 
-      ApiKeyEntity, 
+      UserEntity,
+      ApiKeyEntity,
       SessionEntity,
       AdminSessionEntity,
       AdminLoginAttemptEntity,
@@ -71,14 +73,6 @@ import { RequirePermissionGuard } from './guards/require-permission.guard';
     PasswordService,
     SessionService,
     ApiKeyService,
-  ],
-})
-    AuthService,
-    JwtModule,
-    PassportModule,
-    PasswordService,
-    JwtGuard,
-    RequirePermissionGuard,
   ],
 })
 export class AuthModule {}

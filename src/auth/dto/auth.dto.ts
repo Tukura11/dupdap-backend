@@ -46,6 +46,14 @@ export class RegisterDto {
   })
   @IsString()
   lastName: string;
+
+  @ApiPropertyOptional({
+    description: 'Referral code used during signup',
+    example: 'CH-john-AB12',
+  })
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
 }
 
 export class LoginDto {

@@ -7,6 +7,8 @@ export const validationSchema = Joi.object({
     .default('development'),
   PORT: Joi.number().default(4000),
   DEBUG: Joi.boolean().default(false),
+  REFERRAL_REWARD_AMOUNT_USDC: Joi.string().default('5.00'),
+  REFERRAL_TREASURY_ADDRESS: Joi.string().allow('').optional(),
 
   // Database Configuration
   DB_HOST: Joi.string().default('localhost'),
