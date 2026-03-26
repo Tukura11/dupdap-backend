@@ -34,6 +34,8 @@ import { MaintenanceModeMiddleware } from './app-config/middleware/maintenance-m
 import { AdminModule } from './admin/admin.module';
 import { EarningsModule } from './earnings/earnings.module';
 import { SmsModule } from './sms/sms.module';
+import { PasskeyModule } from './passkey/passkey.module';
+import { SecurityModule } from './security/security.module';
 import { TransactionModule } from './transactions/transactions.module';
 import { PushModule } from './push/push.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
@@ -106,6 +108,7 @@ import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 
     MerchantsModule,
     UsersModule,
+    SecurityModule,
     BankAccountsModule,
     VirtualAccountModule,
     PayLinkModule,
@@ -128,6 +131,9 @@ import { WithdrawalsModule } from './withdrawals/withdrawals.module';
     EarningsModule,
 
     WithdrawalsModule,
+
+    // Passkey/WebAuthn authentication.
+    PasskeyModule,
 
     // Transactions — activity history with cursor-based pagination.
     TransactionModule,
