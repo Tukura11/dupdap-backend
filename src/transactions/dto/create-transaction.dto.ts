@@ -1,5 +1,8 @@
 import { IsEnum, IsString, IsOptional, IsNotEmpty } from 'class-validator';
-import { TransactionType, TransactionStatus } from '../entities/transaction.entity';
+import {
+  TransactionType,
+  TransactionStatus,
+} from '../entities/transaction.entity';
 
 export class CreateTransactionDto {
   @IsNotEmpty()

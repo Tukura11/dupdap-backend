@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { Session } from './entities/session.entity';
 import { jwtConfig } from '../config/jwt.config';
@@ -51,14 +51,18 @@ const makeUser = (overrides: Partial<User> = {}): User =>
     username: 'alice',
     passwordHash: '$2b$12$hashedpassword',
     isAdmin: false,
+    role: UserRole.USER,
+    isMerchant: false,
     isActive: true,
     isTreasury: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as User);
+  }) as User;
 
-const makeRefreshToken = (overrides: Partial<RefreshToken> = {}): RefreshToken =>
+const makeRefreshToken = (
+  overrides: Partial<RefreshToken> = {},
+): RefreshToken =>
   ({
     id: 'rt-uuid-1',
     userId: 'user-uuid-1',
@@ -71,7 +75,7 @@ const makeRefreshToken = (overrides: Partial<RefreshToken> = {}): RefreshToken =
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as RefreshToken);
+  }) as RefreshToken;
 
 // ── Suite ─────────────────────────────────────────────────────────────────────
 
@@ -131,17 +135,25 @@ describe('AuthService', () => {
         .mockResolvedValueOnce(null);
 
       await expect(
-        service.register({ email: 'alice@example.com', username: 'alice', password: 'pass1234' }),
+        service.register({
+          email: 'alice@example.com',
+          username: 'alice',
+          password: 'pass1234',
+        }),
       ).rejects.toThrow(ConflictException);
     });
 
     it('throws ConflictException when username already exists', async () => {
       mockUserRepo.findOne
-        .mockResolvedValueOnce(null)       // email ok
+        .mockResolvedValueOnce(null) // email ok
         .mockResolvedValueOnce(makeUser()); // username taken
 
       await expect(
-        service.register({ email: 'new@example.com', username: 'alice', password: 'pass1234' }),
+        service.register({
+          email: 'new@example.com',
+          username: 'alice',
+          password: 'pass1234',
+        }),
       ).rejects.toThrow(ConflictException);
     });
   });
@@ -164,7 +176,10 @@ describe('AuthService', () => {
         .mockReturnValueOnce('access-token')
         .mockReturnValueOnce('refresh-token');
 
-      const result = await service.login({ email: 'alice@example.com', password: 'password123' });
+      const result = await service.login({
+        email: 'alice@example.com',
+        password: 'password123',
+      });
       expect(result.accessToken).toBe('access-token');
     });
 
@@ -173,7 +188,10 @@ describe('AuthService', () => {
       mockUserRepo.findOne.mockResolvedValue(makeUser({ passwordHash: hash }));
 
       await expect(
-        service.login({ email: 'alice@example.com', password: 'wrongpassword' }),
+        service.login({
+          email: 'alice@example.com',
+          password: 'wrongpassword',
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -187,7 +205,9 @@ describe('AuthService', () => {
 
     it('throws UnauthorizedException for inactive account', async () => {
       const hash = await bcrypt.hash('password123', 4);
-      mockUserRepo.findOne.mockResolvedValue(makeUser({ passwordHash: hash, isActive: false }));
+      mockUserRepo.findOne.mockResolvedValue(
+        makeUser({ passwordHash: hash, isActive: false }),
+      );
 
       await expect(
         service.login({ email: 'alice@example.com', password: 'password123' }),
@@ -199,12 +219,20 @@ describe('AuthService', () => {
 
   describe('refresh', () => {
     it('rotates the refresh token and returns a new pair', async () => {
-      const payload = { sub: 'user-uuid-1', username: 'alice', role: 'user', sessionId: 'session-1' };
+      const payload = {
+        sub: 'user-uuid-1',
+        username: 'alice',
+        role: 'user',
+        sessionId: 'session-1',
+      };
       mockJwtService.verify.mockReturnValue(payload);
 
       const stored = makeRefreshToken({ sessionId: 'session-1' });
       mockTokenRepo.findOne.mockResolvedValue(stored);
-      mockTokenRepo.save.mockResolvedValue({ ...stored, revokedAt: new Date() });
+      mockTokenRepo.save.mockResolvedValue({
+        ...stored,
+        revokedAt: new Date(),
+      });
 
       const user = makeUser();
       mockUserRepo.findOne.mockResolvedValue(user);
@@ -228,29 +256,45 @@ describe('AuthService', () => {
     });
 
     it('throws 401 when refresh token is revoked', async () => {
-      const payload = { sub: 'u1', username: 'alice', role: 'user', sessionId: 's1' };
+      const payload = {
+        sub: 'u1',
+        username: 'alice',
+        role: 'user',
+        sessionId: 's1',
+      };
       mockJwtService.verify.mockReturnValue(payload);
 
       const revokedToken = makeRefreshToken({ revokedAt: new Date() });
       mockTokenRepo.findOne.mockResolvedValue(revokedToken);
 
-      await expect(service.refresh('revoked-token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refresh('revoked-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('throws 401 when reusing a revoked refresh token (rotation guard)', async () => {
       mockJwtService.verify.mockReturnValue({
-        sub: 'u1', username: 'alice', role: 'user', sessionId: 's1',
+        sub: 'u1',
+        username: 'alice',
+        role: 'user',
+        sessionId: 's1',
       });
       // Token not found in DB (was previously rotated away)
       mockTokenRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.refresh('old-revoked-token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refresh('old-revoked-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('throws 401 when verify fails (tampered / expired token)', async () => {
-      mockJwtService.verify.mockImplementation(() => { throw new Error('jwt expired'); });
+      mockJwtService.verify.mockImplementation(() => {
+        throw new Error('jwt expired');
+      });
 
-      await expect(service.refresh('bad-token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refresh('bad-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 

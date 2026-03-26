@@ -14,9 +14,7 @@ describe('TransactionService', () => {
   let service: TransactionService;
   let repository: Repository<Transaction>;
 
-  const mockTransaction = (
-    overrides?: Partial<Transaction>,
-  ): Transaction => {
+  const mockTransaction = (overrides?: Partial<Transaction>): Transaction => {
     const transaction = new Transaction();
     transaction.id = 'tx-1';
     transaction.userId = 'user-1';
@@ -230,9 +228,7 @@ describe('TransactionService', () => {
 
       jest.spyOn(repository, 'find').mockResolvedValue(txs);
 
-      const cursor = Buffer.from('2025-01-01T10:45:00.000Z').toString(
-        'base64',
-      );
+      const cursor = Buffer.from('2025-01-01T10:45:00.000Z').toString('base64');
       const result = await service.findByUserId('user-1', { cursor });
 
       // Should return first 20 items and have a nextCursor

@@ -1,15 +1,11 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TransactionService } from './transactions.service';
 import { QueryTransactionsDto } from './dto/query-transactions.dto';
-import { PaginatedTransactionsDto, TransactionResponseDto } from './dto/transaction-response.dto';
+import {
+  PaginatedTransactionsDto,
+  TransactionResponseDto,
+} from './dto/transaction-response.dto';
 import { Request } from 'express';
 
 @Controller('transactions')

@@ -30,7 +30,8 @@ const VALID_ENV: NodeJS.ProcessEnv = {
 
   STELLAR_RPC_URL: 'https://soroban-testnet.stellar.org',
   STELLAR_NETWORK_PASSPHRASE: 'Test SDF Network ; September 2015',
-  STELLAR_CONTRACT_ID: 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4',
+  STELLAR_CONTRACT_ID:
+    'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4',
   STELLAR_ADMIN_SECRET_KEY: 'stellar-admin-secret-key-that-is-32chars!!',
 
   ZEPTOMAIL_API_KEY: 'zepto-api-key-value',
@@ -40,6 +41,13 @@ const VALID_ENV: NodeJS.ProcessEnv = {
   R2_ACCESS_KEY_ID: 'r2-access-key',
   R2_SECRET_ACCESS_KEY: 'r2-secret-key',
   R2_BUCKET_NAME: 'my-bucket',
+
+  FLUTTERWAVE_SECRET_KEY: 'flutterwave-secret-key',
+  FLUTTERWAVE_WEBHOOK_SECRET: 'flutterwave-webhook-secret',
+  FLUTTERWAVE_BASE_URL: 'https://api.flutterwave.com',
+
+  PAYSTACK_SECRET_KEY: 'paystack-secret-key',
+  PAYSTACK_BASE_URL: 'https://api.paystack.co',
 };
 
 function applyEnv(overrides: NodeJS.ProcessEnv = {}): void {
@@ -76,20 +84,28 @@ describe('AppConfigModule', () => {
     expect(config.get<AppConfig['nodeEnv']>('app.nodeEnv')).toBe('test');
     expect(config.get<AppConfig['apiPrefix']>('app.apiPrefix')).toBe('api/v1');
     expect(config.get<AppConfig['throttleTtl']>('app.throttleTtl')).toBe(60);
-    expect(config.get<AppConfig['throttleLimit']>('app.throttleLimit')).toBe(100);
+    expect(config.get<AppConfig['throttleLimit']>('app.throttleLimit')).toBe(
+      100,
+    );
   });
 
   it('returns correct typed DatabaseConfig values', () => {
-    expect(config.get<DatabaseConfig['host']>('database.host')).toBe('localhost');
+    expect(config.get<DatabaseConfig['host']>('database.host')).toBe(
+      'localhost',
+    );
     expect(config.get<DatabaseConfig['port']>('database.port')).toBe(5432);
-    expect(config.get<DatabaseConfig['user']>('database.user')).toBe('testuser');
+    expect(config.get<DatabaseConfig['user']>('database.user')).toBe(
+      'testuser',
+    );
     expect(config.get<DatabaseConfig['name']>('database.name')).toBe('testdb');
   });
 
   it('returns correct typed RedisConfig values', () => {
     expect(config.get<RedisConfig['host']>('redis.host')).toBe('localhost');
     expect(config.get<RedisConfig['port']>('redis.port')).toBe(6379);
-    expect(config.get<RedisConfig['password']>('redis.password')).toBeUndefined();
+    expect(
+      config.get<RedisConfig['password']>('redis.password'),
+    ).toBeUndefined();
   });
 
   it('exposes optional REDIS_PASSWORD when provided', async () => {
@@ -105,8 +121,12 @@ describe('AppConfigModule', () => {
   });
 
   it('returns correct typed JwtConfig values', () => {
-    expect(config.get<JwtConfig['accessExpiry']>('jwt.accessExpiry')).toBe('15m');
-    expect(config.get<JwtConfig['refreshExpiry']>('jwt.refreshExpiry')).toBe('7d');
+    expect(config.get<JwtConfig['accessExpiry']>('jwt.accessExpiry')).toBe(
+      '15m',
+    );
+    expect(config.get<JwtConfig['refreshExpiry']>('jwt.refreshExpiry')).toBe(
+      '7d',
+    );
   });
 
   it('returns correct Stellar, Zepto, and R2 config values', () => {
