@@ -93,6 +93,8 @@ import { WithdrawalsModule } from './withdrawals/withdrawals.module';
     // 9. RBAC — roles + permissions for admin routes.
     RbacModule,
     MerchantsModule,
+
+    MerchantsModule,
     UsersModule,
     BankAccountsModule,
     PayLinkModule,
@@ -108,6 +110,10 @@ import { WithdrawalsModule } from './withdrawals/withdrawals.module';
     EarningsModule,
 
     WithdrawalsModule,
+    AdminModule,
+
+    // 10. Earnings — yield dashboard, APY display, projections.
+    EarningsModule,
   ],
   providers: [
     {
