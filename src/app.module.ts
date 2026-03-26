@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { WsModule } from './ws/ws.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -50,6 +51,9 @@ import { WsModule } from './ws/ws.module';
 
     // 6. WebSockets — Socket.io real-time gateway.
     WsModule,
+
+    // 7. Notifications — entity + API + realtime delivery.
+    NotificationsModule,
   ],
   providers: [
     // Global guard: every route requires a valid JWT unless decorated @Public().
