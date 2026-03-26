@@ -79,6 +79,16 @@ const validationSchema = Joi.object({
       'any.required': 'STELLAR_ADMIN_SECRET_KEY is required',
       'string.min': 'STELLAR_ADMIN_SECRET_KEY must be at least 32 characters',
     }),
+  STELLAR_RECEIVE_ADDRESS: Joi.string()
+    .length(56)
+    .pattern(/^G[A-Z2-7]{55}$/)
+    .required()
+    .messages({ 'any.required': 'STELLAR_RECEIVE_ADDRESS is required' }),
+  STELLAR_USDC_ISSUER: Joi.string()
+    .length(56)
+    .pattern(/^G[A-Z2-7]{55}$/)
+    .required()
+    .messages({ 'any.required': 'STELLAR_USDC_ISSUER is required' }),
 
   // ── Zepto Mail ───────────────────────────────────────────────────────────
   ZEPTOMAIL_API_KEY: Joi.string()

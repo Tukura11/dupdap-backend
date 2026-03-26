@@ -24,6 +24,8 @@ import { MerchantsModule } from './merchants/merchants.module';
 import { UsersModule } from './users/users.module';
 import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
+import { ReceiveModule } from './receive/receive.module';
+import { VirtualAccountModule } from './virtual-account/virtual-account.module';
 import { AdminModule } from './admin/admin.module';
 import { EarningsModule } from './earnings/earnings.module';
 import { SmsModule } from './sms/sms.module';
@@ -95,7 +97,9 @@ import { SmsModule } from './sms/sms.module';
     MerchantsModule,
     UsersModule,
     BankAccountsModule,
+    VirtualAccountModule,
     PayLinkModule,
+    ReceiveModule,
     AdminModule,
 
     // 10. SMS — OTP + transaction alerts via Termii + BullMQ.

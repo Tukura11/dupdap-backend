@@ -14,7 +14,6 @@ import { AdminService } from './admin.service';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { AdminRole } from './entities/admin.entity';
-import { UserRole } from '../users/entities/user.entity';
 import { Request } from 'express';
 
 @ApiTags('admin')
