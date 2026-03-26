@@ -89,6 +89,7 @@ import { SmsModule } from './sms/sms.module';
 
     // 9. RBAC — roles + permissions for admin routes.
     RbacModule,
+    MerchantsModule,
 
     MerchantsModule,
     UsersModule,
@@ -98,6 +99,8 @@ import { SmsModule } from './sms/sms.module';
 
     // 10. SMS — OTP + transaction alerts via Termii + BullMQ.
     SmsModule,
+
+    AdminModule,
   ],
   providers: [
     {
