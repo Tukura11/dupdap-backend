@@ -11,6 +11,7 @@ import { r2Config } from './r2.config';
 import { flutterwaveConfig } from './flutterwave.config';
 import { paystackConfig } from './paystack.config';
 import { firebaseConfig } from './firebase.config';
+import { sudoAfricaConfig } from './sudo-africa.config';
 
 /**
  * Combined Joi validation schema for all environment variables.
@@ -146,6 +147,17 @@ const validationSchema = Joi.object({
     .required()
     .messages({ 'any.required': 'PAYSTACK_SECRET_KEY is required' }),
   PAYSTACK_BASE_URL: Joi.string().uri().default('https://api.paystack.co'),
+
+  // ── Sudo Africa ────────────────────────────────────────────────────────────
+  SUDO_AFRICA_API_KEY: Joi.string()
+    .required()
+    .messages({ 'any.required': 'SUDO_AFRICA_API_KEY is required' }),
+  SUDO_AFRICA_BASE_URL: Joi.string()
+    .uri()
+    .default('https://api.sudoafrica.com/v1'),
+  SUDO_AFRICA_WEBHOOK_SECRET: Joi.string()
+    .required()
+    .messages({ 'any.required': 'SUDO_AFRICA_WEBHOOK_SECRET is required' }),
 });
 
 @Module({
@@ -163,6 +175,7 @@ const validationSchema = Joi.object({
         flutterwaveConfig,
         paystackConfig,
         firebaseConfig,
+        sudoAfricaConfig,
       ],
       validationSchema,
       validationOptions: { abortEarly: false },

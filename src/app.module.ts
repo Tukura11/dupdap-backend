@@ -28,6 +28,7 @@ import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
 import { ReceiveModule } from './receive/receive.module';
 import { VirtualAccountModule } from './virtual-account/virtual-account.module';
+import { VirtualCardsModule } from './virtual-cards/virtual-cards.module';
 import { AuditModule } from './audit/audit.module';
 import { AppConfigModule as RuntimeConfigModule } from './app-config/app-config.module';
 import { MaintenanceModeMiddleware } from './app-config/middleware/maintenance-mode.middleware';
@@ -122,6 +123,7 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
     SecurityModule,
     BankAccountsModule,
     VirtualAccountModule,
+    VirtualCardsModule,
     PayLinkModule,
     ReceiveModule,
 
