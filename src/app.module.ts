@@ -49,6 +49,7 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
 import { OtpModule } from './otp/otp.module';
 import { PwaModule } from './pwa/pwa.module';
 import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
+import { ComplianceModule } from './compliance/compliance.module';
 
 @Module({
   imports: [
@@ -163,6 +164,7 @@ import { SecurityHeadersMiddleware } from './security/security-headers.middlewar
 
     // Reports — async CSV data exports via BullMQ + R2.
     ReportsModule,
+    ComplianceModule,
   ],
   providers: [
     {
