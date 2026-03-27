@@ -1,39 +1,45 @@
 import {
+  Body,
   Controller,
-  NotImplementedException,
+  Get,
+  Param,
+  ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import type { Request } from 'express';
-import { User } from '../users/entities/user.entity';
-import { RequirePin } from '../pin/decorators/require-pin.decorator';
-import { PinGuard } from '../pin/guards/pin.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { WithdrawalsService } from './withdrawals.service';
+import { CreateWithdrawalDto } from './dto/create-withdrawal.dto';
+import { WithdrawalQueryDto } from './dto/withdrawal-query.dto';
 
-type AuthenticatedRequest = Request & { user: User };
-
-@ApiTags('withdrawals')
-@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('withdrawals')
 export class WithdrawalsController {
+  constructor(private readonly withdrawalsService: WithdrawalsService) {}
+
   @Post()
-  @RequirePin()
-  @UseGuards(PinGuard)
-  @ApiHeader({
-    name: 'X-Transaction-Pin',
-    description: '4-digit transaction PIN',
-    required: true,
-  })
-  @ApiOperation({ summary: 'Create a withdrawal (placeholder)' })
-  @ApiResponse({ status: 501 })
-  withdraw(@Req() _req: AuthenticatedRequest): never {
-    throw new NotImplementedException('Withdrawals are not implemented yet');
+  create(
+    @Req() req: { user: { id: string } },
+    @Body() dto: CreateWithdrawalDto,
+  ) {
+    return this.withdrawalsService.create(req.user.id, dto);
+  }
+
+  @Get()
+  findAll(
+    @Req() req: { user: { id: string } },
+    @Query() query: WithdrawalQueryDto,
+  ) {
+    return this.withdrawalsService.findAll(req.user.id, query);
+  }
+
+  @Get(':id')
+  findOne(
+    @Req() req: { user: { id: string } },
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.withdrawalsService.findOne(req.user.id, id);
   }
 }

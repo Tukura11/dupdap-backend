@@ -31,6 +31,9 @@ describe('RolesGuard', () => {
   });
 
   it('should allow access if user has required role', () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue([UserRole.ADMIN]);
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
     const context = {
       getHandler: () => ({}),
@@ -44,6 +47,9 @@ describe('RolesGuard', () => {
   });
 
   it('should deny access if user does not have required role', () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue([UserRole.ADMIN]);
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
     const context = {
       getHandler: () => ({}),
@@ -57,6 +63,9 @@ describe('RolesGuard', () => {
   });
 
   it('should deny access if no user in request', () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue([UserRole.ADMIN]);
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
     const context = {
       getHandler: () => ({}),

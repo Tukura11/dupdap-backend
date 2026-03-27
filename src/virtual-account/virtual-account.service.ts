@@ -11,7 +11,10 @@ import type { ConfigType } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import * as crypto from 'crypto';
 import Redis from 'ioredis';
-import { VirtualAccount, VirtualAccountProvider } from './entities/virtual-account.entity';
+import {
+  VirtualAccount,
+  VirtualAccountProvider,
+} from './entities/virtual-account.entity';
 import { flutterwaveConfig } from '../config/flutterwave.config';
 import { redisConfig } from '../config/redis.config';
 import { CheeseGateway, WS_EVENTS } from '../ws/cheese.gateway';
@@ -113,7 +116,13 @@ export class VirtualAccountService {
 
     // Idempotency — SET NX returns null if key already exists
     const dedupKey = `va:event:${reference}`;
-    const acquired = await this.redis.set(dedupKey, '1', 'EX', DEDUP_TTL_SECONDS, 'NX');
+    const acquired = await this.redis.set(
+      dedupKey,
+      '1',
+      'EX',
+      DEDUP_TTL_SECONDS,
+      'NX',
+    );
     if (acquired === null) {
       this.logger.debug(`Duplicate webhook reference ${reference} — skipping`);
       return;

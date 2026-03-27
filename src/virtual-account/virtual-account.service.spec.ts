@@ -5,7 +5,10 @@ import { UnauthorizedException } from '@nestjs/common';
 import { of } from 'rxjs';
 import * as crypto from 'crypto';
 import { VirtualAccountService } from './virtual-account.service';
-import { VirtualAccount, VirtualAccountProvider } from './entities/virtual-account.entity';
+import {
+  VirtualAccount,
+  VirtualAccountProvider,
+} from './entities/virtual-account.entity';
 import { flutterwaveConfig } from '../config/flutterwave.config';
 import { redisConfig } from '../config/redis.config';
 import { CheeseGateway, WS_EVENTS } from '../ws/cheese.gateway';
@@ -42,7 +45,9 @@ const mockRatesService = { convertNgnToUsdc: jest.fn() };
 
 const mockSorobanService = { deposit: jest.fn().mockResolvedValue(undefined) };
 
-const mockDepositsService = { createDeposit: jest.fn().mockResolvedValue(undefined) };
+const mockDepositsService = {
+  createDeposit: jest.fn().mockResolvedValue(undefined),
+};
 
 const mockFwConfig = {
   secretKey: 'FW-test-key',
@@ -91,7 +96,11 @@ describe('VirtualAccountService', () => {
           },
         }),
       );
-      const saved = { id: 'va-1', userId: 'user-1', accountNumber: '0123456789' };
+      const saved = {
+        id: 'va-1',
+        userId: 'user-1',
+        accountNumber: '0123456789',
+      };
       mockVaRepo.create.mockReturnValue(saved);
       mockVaRepo.save.mockResolvedValue(saved);
 

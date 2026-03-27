@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigType } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule, appConfig, redisConfig } from './config';
@@ -18,6 +19,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { LoggingModule } from './logging/logging.module';
 import { CorrelationIdMiddleware } from './logging/correlation-id.middleware';
 import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { RbacModule } from './rbac/rbac.module';
 import { MerchantsModule } from './merchants/merchants.module';
@@ -26,17 +28,30 @@ import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
 import { ReceiveModule } from './receive/receive.module';
 import { VirtualAccountModule } from './virtual-account/virtual-account.module';
+import { AuditModule } from './audit/audit.module';
+import { AppConfigModule as RuntimeConfigModule } from './app-config/app-config.module';
+import { MaintenanceModeMiddleware } from './app-config/middleware/maintenance-mode.middleware';
 import { AdminModule } from './admin/admin.module';
 import { EarningsModule } from './earnings/earnings.module';
 import { SmsModule } from './sms/sms.module';
 import { PinModule } from './pin/pin.module';
 import { TransfersModule } from './transfers/transfers.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
+import { PasskeyModule } from './passkey/passkey.module';
+import { SecurityModule } from './security/security.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { PushModule } from './push/push.module';
+import { WaitlistModule } from './waitlist/waitlist.module';
+import { KycModule } from './kyc/kyc.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
     // 1. Config — global, validates all env vars at startup with abortEarly: false.
     AppConfigModule,
+
+    // 1a. Schedule — enables @Cron decorators for background jobs.
+    ScheduleModule.forRoot(),
 
     // 1b. Logging — Winston + Nest bridge.
     LoggingModule,
@@ -81,45 +96,74 @@ import { WithdrawalsModule } from './withdrawals/withdrawals.module';
     // 8. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
-    // 6. File uploads — presign + confirm via Cloudflare R2.
+    // File uploads — presign + confirm via Cloudflare R2.
     UploadModule,
 
-    // 7. WebSockets — Socket.io real-time gateway.
+    // WebSockets — Socket.io real-time gateway.
     WsModule,
 
-    // 7. Notifications — entity + API + realtime delivery.
+    // Notifications — entity + API + realtime delivery.
     NotificationsModule,
 
-    // 8. Webhooks — subscriptions + signed deliveries + retries.
+    // Webhooks — subscriptions + signed deliveries + retries.
     WebhooksModule,
 
-    // 9. RBAC — roles + permissions for admin routes.
+    // RBAC — roles + permissions for admin routes.
     RbacModule,
-    MerchantsModule,
 
     MerchantsModule,
     UsersModule,
     PinModule,
     TransfersModule,
     WithdrawalsModule,
+    SecurityModule,
     BankAccountsModule,
     VirtualAccountModule,
     PayLinkModule,
     ReceiveModule,
+
+    AuditModule,
+
+    // Runtime feature flags + maintenance mode.
+    RuntimeConfigModule,
+
     AdminModule,
 
-    // 10. SMS — OTP + transaction alerts via Termii + BullMQ.
+    // SMS — OTP + transaction alerts via Termii + BullMQ.
     SmsModule,
 
-    AdminModule,
+    // Push — Firebase Cloud Messaging device token management.
+    PushModule,
 
-    // 10. Earnings — yield dashboard, APY display, projections.
+    // Earnings — yield dashboard, APY display, projections.
     EarningsModule,
+
+    WithdrawalsModule,
+
+    // Transactions — activity history with cursor-based pagination.
+    // Passkey/WebAuthn authentication.
+    PasskeyModule,
+
+    // Transactions — activity history with cursor-based pagination.
+    TransactionsModule,
+
+    // Waitlist — viral pre-launch signups with referral points.
+    WaitlistModule,
+
+    // KYC — document submission and admin review for tier upgrades.
+    KycModule,
+
+    // Reports — async CSV data exports via BullMQ + R2.
+    ReportsModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
@@ -130,5 +174,6 @@ import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+    consumer.apply(MaintenanceModeMiddleware).forRoutes('*');
   }
 }
