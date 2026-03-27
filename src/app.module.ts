@@ -27,6 +27,7 @@ import { PayLinkModule } from './paylink/paylink.module';
 import { AdminModule } from './admin/admin.module';
 import { EarningsModule } from './earnings/earnings.module';
 import { SmsModule } from './sms/sms.module';
+import { OtpModule } from './otp/otp.module';
 
 @Module({
   imports: [
@@ -100,6 +101,7 @@ import { SmsModule } from './sms/sms.module';
 
     // 10. SMS — OTP + transaction alerts via Termii + BullMQ.
     SmsModule,
+    OtpModule,
 
     AdminModule,
 
