@@ -46,6 +46,8 @@ import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
+import { SentryModule as SentryUserContextModule } from './sentry/sentry.module';
+import { SentryUserMiddleware } from './sentry/sentry-user.middleware';
 
 @Module({
   imports: [
@@ -159,6 +161,9 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
 
     // Reports — async CSV data exports via BullMQ + R2.
     ReportsModule,
+
+    // Sentry user context module
+    SentryUserContextModule,
   ],
   providers: [
     {
@@ -183,5 +188,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
     consumer.apply(MaintenanceModeMiddleware).forRoutes('*');
+    consumer.apply(SentryUserMiddleware).forRoutes('*');
   }
 }
