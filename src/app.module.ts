@@ -41,6 +41,7 @@ import { PushModule } from './push/push.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -146,6 +147,9 @@ import { KycModule } from './kyc/kyc.module';
 
     // KYC — document submission and admin review for tier upgrades.
     KycModule,
+
+    // Reports — async CSV data exports via BullMQ + R2.
+    ReportsModule,
   ],
   providers: [
     {
