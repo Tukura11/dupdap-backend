@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { StellarModule } from './stellar/stellar.module';
 import { WsModule } from './ws/ws.module';
 
 @Module({
@@ -45,6 +46,8 @@ import { WsModule } from './ws/ws.module';
 
     HealthModule,
 
+    StellarModule,
+
     // 5. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
@@ -60,4 +63,3 @@ import { WsModule } from './ws/ws.module';
   ],
 })
 export class AppModule {}
-
