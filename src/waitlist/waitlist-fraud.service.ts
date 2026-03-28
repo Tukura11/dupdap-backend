@@ -66,7 +66,7 @@ export class WaitlistFraudService {
   private async checkDisposableEmail(dto: JoinWaitlistDto, ip: string): Promise<void> {
     const domain = dto.email.split('@')[1]?.toLowerCase();
     
-    if (domain && DISPOSABLE_DOMAINS.includes(domain)) {
+    if (domain && DISPOSABLE_DOMAINS.has(domain)) {
       await this.logFraud(dto, ip, 'DISPOSABLE_EMAIL', FraudAction.BLOCKED, { domain });
       throw new WaitlistFraudException('Disposable email addresses are not allowed', 400, FraudAction.BLOCKED);
     }
@@ -163,7 +163,7 @@ export class WaitlistFraudService {
       });
       await this.fraudLogRepo.save(log);
     } catch (error) {
-      this.logger.error(`Failed to log fraud detection: ${error.message}`);
+      this.logger.error(`Failed to log fraud detection: ${(error as Error).message}`);
     }
   }
 
@@ -203,7 +203,7 @@ export class WaitlistFraudService {
       });
       await this.fraudLogRepo.save(log);
     } catch (error) {
-      this.logger.error(`Failed to log IP reset: ${error.message}`);
+      this.logger.error(`Failed to log IP reset: ${(error as Error).message}`);
     }
   }
 }
