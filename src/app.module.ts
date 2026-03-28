@@ -16,8 +16,10 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StellarModule } from './stellar/stellar.module';
 import { UploadModule } from './uploads/upload.module';
 import { WsModule } from './ws/ws.module';
+import { OnRampModule } from './onramp/onramp.module';
 import { QueueModule } from './queue/queue.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AnnouncementsModule } from './announcements/announcements.module';
 import { LoggingModule } from './logging/logging.module';
 import { CorrelationIdMiddleware } from './logging/correlation-id.middleware';
 import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
@@ -56,6 +58,7 @@ import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
 import { WalletsModule } from './wallets/wallets.module';
+import { BlockchainTransactionsModule } from './blockchain-transactions/blockchain-transactions.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
 import { CronModule } from './cron/cron.module';
@@ -67,6 +70,8 @@ import { OtpModule } from './otp/otp.module';
 import { PwaModule } from './pwa/pwa.module';
 import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
 import { ComplianceModule } from './compliance/compliance.module';
+import { DisputesModule } from './disputes/disputes.module';
+import { UsernameModule } from './username/username.module';
 import { SplitsModule } from './splits/splits.module';
 import { FeedbackModule } from './feedback/feedback.module';
 
@@ -112,6 +117,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     QueueModule,
 
     HealthModule,
+    OnRampModule,
     ApiVersionModule,
     SorobanModule,
     CronModule,
@@ -139,6 +145,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 
     // Notifications — entity + API + realtime delivery.
     NotificationsModule,
+    AnnouncementsModule,
 
     // Webhooks — subscriptions + signed deliveries + retries.
     WebhooksModule,
@@ -186,6 +193,9 @@ import { FeedbackModule } from './feedback/feedback.module';
     // Passkey/WebAuthn authentication.
     PasskeyModule,
 
+    // Blockchain transactions — on-chain audit trail.
+    BlockchainTransactionsModule,
+
     // Transactions — activity history with cursor-based pagination.
     TransactionsModule,
 
@@ -209,10 +219,17 @@ import { FeedbackModule } from './feedback/feedback.module';
     // Wallets — Stellar keypair provisioning + balance sync.
     WalletsModule,
 
+    // Disputes — transaction chargeback and reversal requests.
+    DisputesModule,
+    UsernameModule,
+
+
     // Splits — split payment requests among multiple users.
     SplitsModule,
     FeedbackModule,
+
   ],
+
   providers: [
     {
       provide: APP_GUARD,
@@ -232,7 +249,6 @@ import { FeedbackModule } from './feedback/feedback.module';
     },
   ],
 })
-export class AppModule {}
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');

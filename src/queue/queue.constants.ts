@@ -10,6 +10,7 @@ export const QUEUE_NAMES = [
   'fraud-jobs',
   'report-jobs',
   'referral-jobs',
+  'support-jobs',
 ] as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[number];
