@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { WsModule } from './ws/ws.module';
+import { OnRampModule } from './onramp/onramp.module';
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ import { WsModule } from './ws/ws.module';
     }),
 
     HealthModule,
-
+    OnRampModule,
     // 5. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
@@ -60,4 +61,3 @@ import { WsModule } from './ws/ws.module';
   ],
 })
 export class AppModule {}
-
