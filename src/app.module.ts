@@ -122,6 +122,9 @@ import { ComplianceModule } from './compliance/compliance.module';
     // 7. Rates — USDC/NGN live rates with Redis cache + BullMQ polling.
     RatesModule,
 
+    StellarModule,
+
+    // 5. Auth — register/login/refresh/logout + global JWT guard.
     // 8. Auth — register/login/refresh/logout + global JWT guard.
     AuthModule,
 
