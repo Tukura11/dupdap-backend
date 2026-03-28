@@ -28,6 +28,7 @@ import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { PayLinkModule } from './paylink/paylink.module';
 import { ReceiveModule } from './receive/receive.module';
 import { VirtualAccountModule } from './virtual-account/virtual-account.module';
+import { VirtualCardsModule } from './virtual-cards/virtual-cards.module';
 import { AuditModule } from './audit/audit.module';
 import { AppConfigModule as RuntimeConfigModule } from './app-config/app-config.module';
 import { MaintenanceModeMiddleware } from './app-config/middleware/maintenance-mode.middleware';
@@ -44,9 +45,17 @@ import { PushModule } from './push/push.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
+import { WalletsModule } from './wallets/wallets.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
 import { ActivityModule } from './activity/activity.module';
+import { BalanceModule } from './balance/balance.module';
+import { SentryModule as SentryUserContextModule } from './sentry/sentry.module';
+import { SentryUserMiddleware } from './sentry/sentry-user.middleware';
+import { OtpModule } from './otp/otp.module';
+import { PwaModule } from './pwa/pwa.module';
+import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
+import { ComplianceModule } from './compliance/compliance.module';
 
 @Module({
   imports: [
@@ -123,6 +132,7 @@ import { ActivityModule } from './activity/activity.module';
     SecurityModule,
     BankAccountsModule,
     VirtualAccountModule,
+    VirtualCardsModule,
     PayLinkModule,
     ReceiveModule,
 
@@ -139,6 +149,7 @@ import { ActivityModule } from './activity/activity.module';
 
     // Push — Firebase Cloud Messaging device token management.
     PushModule,
+    PwaModule,
 
     // Earnings — yield dashboard, APY display, projections.
     EarningsModule,
@@ -163,6 +174,14 @@ import { ActivityModule } from './activity/activity.module';
 
     // Activity — chronological feed with cursor pagination, summary, and breakdown.
     ActivityModule,
+    // Balance — unified balance aggregation with caching.
+    BalanceModule,
+    // Sentry user context module
+    SentryUserContextModule,
+    ComplianceModule,
+
+    // Wallets — Stellar keypair provisioning + balance sync.
+    WalletsModule,
   ],
   providers: [
     {
@@ -187,5 +206,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
     consumer.apply(MaintenanceModeMiddleware).forRoutes('*');
+    consumer.apply(SentryUserMiddleware).forRoutes('*');
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
   }
 }
