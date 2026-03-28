@@ -16,6 +16,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StellarModule } from './stellar/stellar.module';
 import { UploadModule } from './uploads/upload.module';
 import { WsModule } from './ws/ws.module';
+import { OnRampModule } from './onramp/onramp.module';
 import { QueueModule } from './queue/queue.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AnnouncementsModule } from './announcements/announcements.module';
@@ -115,6 +116,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     QueueModule,
 
     HealthModule,
+    OnRampModule,
     ApiVersionModule,
     SorobanModule,
     CronModule,
