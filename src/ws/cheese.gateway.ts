@@ -57,7 +57,10 @@ export class CheeseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleConnection(client: Socket): Promise<void> {
-    const token: string | undefined = client.handshake.auth?.token;
+    const handshakeAuth = client.handshake.auth as
+      | { token?: string }
+      | undefined;
+    const token: string | undefined = handshakeAuth?.token;
 
     if (!token) {
       client.disconnect();
@@ -93,10 +96,26 @@ export class CheeseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  async emitToUser(userId: string, event: string, data: unknown): Promise<void> {
+  async emitToUser(
+    userId: string,
+    event: string,
+    data: unknown,
+  ): Promise<void> {
     const sockets = await this.redis.hkeys(`${REDIS_WS_PREFIX}${userId}`);
     if (sockets.length === 0) return;
     this.server.to(`user:${userId}`).emit(event, data);
+  }
+
+  emitToAdmins(event: string, data: unknown): Promise<void> {
+    if (!this.server) {
+      this.logger.warn(
+        'WebSocket server is not ready; skipping admin broadcast',
+      );
+      return Promise.resolve();
+    }
+
+    this.server.to('admin').emit(event, data);
+    return Promise.resolve();
   }
 
   async getStats(): Promise<{ connectedUsers: number; totalSockets: number }> {

@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { WsModule } from './ws/ws.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -43,6 +44,8 @@ import { WsModule } from './ws/ws.module';
       }),
     }),
 
+    QueueModule,
+
     HealthModule,
 
     // 5. Auth — register/login/refresh/logout + global JWT guard.
@@ -60,4 +63,3 @@ import { WsModule } from './ws/ws.module';
   ],
 })
 export class AppModule {}
-
