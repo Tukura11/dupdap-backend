@@ -12,6 +12,7 @@ import {
   DOCUMENTED_API_VERSIONS,
 } from './api-version/api-version.policy';
 import { filterOpenApiPathsForVersion } from './api-version/filter-openapi-for-version';
+import { isAllowedCorsOrigin } from './security/cors.util';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { version } = require('../package.json') as { version: string };
 
@@ -92,7 +93,25 @@ async function bootstrap(): Promise<void> {
   const port = config.get<AppConfig['port']>('app.port')!;
   const apiPrefix = config.get<AppConfig['apiPrefix']>('app.apiPrefix')!;
 
-  app.enableCors();
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (
+        isAllowedCorsOrigin(
+          origin,
+          config.get<AppConfig['frontendUrl']>('app.frontendUrl')!,
+        )
+      ) {
+        callback(null, true);
+        return;
+      }
+
+      callback(
+        new Error(`Origin ${origin ?? 'unknown'} is not allowed by CORS`),
+        false,
+      );
+    },
+    credentials: true,
+  });
   app.setGlobalPrefix(apiPrefix);
   app.enableVersioning({
     type: VersioningType.URI,

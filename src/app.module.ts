@@ -44,10 +44,15 @@ import { PushModule } from './push/push.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
+import { WalletsModule } from './wallets/wallets.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
 import { SentryModule as SentryUserContextModule } from './sentry/sentry.module';
 import { SentryUserMiddleware } from './sentry/sentry-user.middleware';
+import { OtpModule } from './otp/otp.module';
+import { PwaModule } from './pwa/pwa.module';
+import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
+import { ComplianceModule } from './compliance/compliance.module';
 
 @Module({
   imports: [
@@ -140,6 +145,7 @@ import { SentryUserMiddleware } from './sentry/sentry-user.middleware';
 
     // Push — Firebase Cloud Messaging device token management.
     PushModule,
+    PwaModule,
 
     // Earnings — yield dashboard, APY display, projections.
     EarningsModule,
@@ -164,6 +170,10 @@ import { SentryUserMiddleware } from './sentry/sentry-user.middleware';
 
     // Sentry user context module
     SentryUserContextModule,
+    ComplianceModule,
+
+    // Wallets — Stellar keypair provisioning + balance sync.
+    WalletsModule,
   ],
   providers: [
     {
@@ -189,5 +199,6 @@ export class AppModule implements NestModule {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
     consumer.apply(MaintenanceModeMiddleware).forRoutes('*');
     consumer.apply(SentryUserMiddleware).forRoutes('*');
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
   }
 }
