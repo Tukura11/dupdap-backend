@@ -40,6 +40,13 @@ import { TransfersModule } from './transfers/transfers.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { PasskeyModule } from './passkey/passkey.module';
 import { SecurityModule } from './security/security.module';
+import { SandboxModule } from './sandbox/sandbox.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
+
+// TODO: Enable Sentry when @sentry/nestjs module is compatible
+// import { SentryModule } from '@sentry/nestjs';
+import { AlertModule } from './alert/alert.module';
+import { GroupsModule } from './groups/groups.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PushModule } from './push/push.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
@@ -132,6 +139,10 @@ import { ComplianceModule } from './compliance/compliance.module';
     TransfersModule,
     WithdrawalsModule,
     SecurityModule,
+    SandboxModule,
+    MaintenanceModule,
+    AlertModule,
+    GroupsModule,
     BankAccountsModule,
     VirtualAccountModule,
     VirtualCardsModule,
