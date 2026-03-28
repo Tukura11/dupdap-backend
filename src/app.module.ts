@@ -209,7 +209,9 @@ import { SplitsModule } from './splits/splits.module';
 
     // Splits — split payment requests among multiple users.
     SplitsModule,
+    ProfileModule,
   ],
+
   providers: [
     {
       provide: APP_GUARD,
@@ -229,7 +231,6 @@ import { SplitsModule } from './splits/splits.module';
     },
   ],
 })
-export class AppModule {}
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');

@@ -41,8 +41,20 @@ export class User extends BaseEntity {
   @Column({ name: 'phone_verified', default: false })
   phoneVerified!: boolean;
 
-  @Column({ name: 'display_name', length: 100, nullable: true, default: null })
+@Column({ name: 'display_name', length: 100, nullable: true, default: null })
   displayName!: string | null;
+
+  @Column({ length: 160, nullable: true, default: null })
+  bio!: string | null;
+
+  @Column({ name: 'avatar_key', length: 255, nullable: true, default: null })
+  avatarKey!: string | null;
+
+  @Column({ name: 'twitter_handle', length: 50, nullable: true, default: null })
+  twitterHandle!: string | null;
+
+  @Column({ name: 'instagram_handle', length: 50, nullable: true, default: null })
+  instagramHandle!: string | null;
 
   @Column({
     type: 'enum',
@@ -75,17 +87,6 @@ export class User extends BaseEntity {
 
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;
-
-  // ── Security Features ────────────────────────────────────────
-
-  @Column({ name: 'email_verified', default: false })
-  emailVerified!: boolean;
-
-  @Column({ name: 'phone_verified', default: false })
-  phoneVerified!: boolean;
-
-  @Column({ name: 'pin_hash', length: 255, nullable: true, default: null })
-  pinHash!: string | null;
 
   @Column({ name: 'passkey_id', length: 255, nullable: true, default: null })
   passkeyId!: string | null;
