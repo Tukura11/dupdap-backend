@@ -23,6 +23,8 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { AdminRole } from './entities/admin.entity';
 import { Request } from 'express';
 import { AuditInterceptor, Audit } from '../audit/audit.interceptor';
+import { ReferralAnalyticsService } from '../referrals/referral-analytics.service';
+import { FunnelStatsDto, TopReferrersDto, CohortComparisonDto, RewardSpendDto, UserReferralStatsDto } from '../referrals/dto/referral-analytics.dto';
 
 @ApiTags('admin')
 @ApiBearerAuth()
@@ -33,6 +35,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly receiptService: ReceiptService,
+    private readonly referralAnalyticsService: ReferralAnalyticsService,
   ) {}
 
   @Get('users')
@@ -40,6 +43,27 @@ export class AdminController {
   @ApiOperation({ summary: 'List all users with pagination and filtering' })
   async listUsers(@Query() query: any) {
     return this.adminService.findAllUsers(query);
+  }
+
+  @Get('referrals/analytics')
+  @Roles(AdminRole.ADMIN, AdminRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Referral funnel stats + top referrers + reward spend' })
+  async getReferralAnalytics(): Promise<FunnelStatsDto> {
+    return this.referralAnalyticsService.getFunnelStats();
+  }
+
+  @Get('referrals/cohort')
+  @Roles(AdminRole.ADMIN, AdminRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Referred vs organic cohort comparison' })
+  async getReferralCohort(): Promise<CohortComparisonDto> {
+    return this.referralAnalyticsService.getCohortComparison();
+  }
+
+  @Get('referrals/users/:userId')
+  @Roles(AdminRole.ADMIN, AdminRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Individual user referral performance' })
+  async getUserReferralStats(@Param('userId') userId: string): Promise<UserReferralStatsDto> {
+    return this.referralAnalyticsService.getUserReferralStats(userId);
   }
 
   @Get('users/:id')
