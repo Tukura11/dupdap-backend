@@ -12,6 +12,7 @@ import { flutterwaveConfig } from './flutterwave.config';
 import { paystackConfig } from './paystack.config';
 import { firebaseConfig } from './firebase.config';
 import { sudoAfricaConfig } from './sudo-africa.config';
+import { webPushConfig } from './web-push.config';
 
 /**
  * Combined Joi validation schema for all environment variables.
@@ -141,6 +142,15 @@ const validationSchema = Joi.object({
 
   // ── Firebase ─────────────────────────────────────────────────────────────
   FIREBASE_SERVICE_ACCOUNT: Joi.string().required().messages({ 'any.required': 'FIREBASE_SERVICE_ACCOUNT is required' }),
+  VAPID_PUBLIC_KEY: Joi.string()
+    .required()
+    .messages({ 'any.required': 'VAPID_PUBLIC_KEY is required' }),
+  VAPID_PRIVATE_KEY: Joi.string()
+    .required()
+    .messages({ 'any.required': 'VAPID_PRIVATE_KEY is required' }),
+  VAPID_SUBJECT: Joi.string()
+    .uri({ scheme: [/https?/, 'mailto'] })
+    .default('mailto:support@cheesepay.app'),
 
   // ── Paystack ──────────────────────────────────────────────────────────────
   PAYSTACK_SECRET_KEY: Joi.string()
@@ -176,6 +186,7 @@ const validationSchema = Joi.object({
         paystackConfig,
         firebaseConfig,
         sudoAfricaConfig,
+        webPushConfig,
       ],
       validationSchema,
       validationOptions: { abortEarly: false },

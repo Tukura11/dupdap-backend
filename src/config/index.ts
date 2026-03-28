@@ -17,3 +17,4 @@ export {
   sudoAfricaConfig,
   type SudoAfricaConfig,
 } from './sudo-africa.config';
+export { webPushConfig, webPushConfigValidation } from './web-push.config';
