@@ -44,6 +44,7 @@ import { PushModule } from './push/push.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
+import { WalletsModule } from './wallets/wallets.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
 import { OtpModule } from './otp/otp.module';
@@ -165,6 +166,9 @@ import { ComplianceModule } from './compliance/compliance.module';
     // Reports — async CSV data exports via BullMQ + R2.
     ReportsModule,
     ComplianceModule,
+
+    // Wallets — Stellar keypair provisioning + balance sync.
+    WalletsModule,
   ],
   providers: [
     {
