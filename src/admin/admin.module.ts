@@ -15,6 +15,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { CronModule } from '../cron/cron.module';
 import { CronAdminController } from './cron-admin.controller';
 import { AuditModule } from '../audit/audit.module';
+import { ReferralsModule } from '../referrals/referrals.module';
 
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ReceiptModule } from '../receipt/receipt.module';
@@ -36,6 +37,7 @@ import { ReceiptModule } from '../receipt/receipt.module';
     AnalyticsModule,
     CronModule,
     ReceiptModule,
+    ReferralsModule,
   ],
   providers: [AdminService],
   controllers: [AdminController, CronAdminController],
