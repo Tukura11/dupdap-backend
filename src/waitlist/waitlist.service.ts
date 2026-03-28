@@ -102,11 +102,19 @@ export class WaitlistService {
     });
     await this.repo.save(entry);
 
-    // 7. Award referrer bonus
+    // 7. Award referrer bonus (check for self-referral abuse)
     if (referrer) {
-      await this.repo.increment({ id: referrer.id }, 'points', REFERRAL_BONUS);
-      referrer.points += REFERRAL_BONUS;
-      await this.redis.zadd(LEADERBOARD_KEY, referrer.points, referrer.referralCode);
+      // Check if this was flagged as self-referral abuse
+      const fraudLogs = await this.fraudService.getFraudLogs(1, 1, 'REFERRAL_SELF_ABUSE');
+      const isSelfReferralAbuse = fraudLogs.data.some(log => 
+        log.email === dto.email && log.ip === ipAddress
+      );
+      
+      if (!isSelfReferralAbuse) {
+        await this.repo.increment({ id: referrer.id }, 'points', REFERRAL_BONUS);
+        referrer.points += REFERRAL_BONUS;
+        await this.redis.zadd(LEADERBOARD_KEY, referrer.points, referrer.referralCode);
+      }
     }
 
     // 8. Add to Redis leaderboard sorted set
