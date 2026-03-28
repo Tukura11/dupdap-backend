@@ -47,6 +47,9 @@ import { ReportsModule } from './reports/reports.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
+import { OtpModule } from './otp/otp.module';
+import { PwaModule } from './pwa/pwa.module';
+import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
 
 @Module({
   imports: [
@@ -139,6 +142,7 @@ import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers
 
     // Push — Firebase Cloud Messaging device token management.
     PushModule,
+    PwaModule,
 
     // Earnings — yield dashboard, APY display, projections.
     EarningsModule,
@@ -187,5 +191,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
     consumer.apply(MaintenanceModeMiddleware).forRoutes('*');
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
   }
 }
