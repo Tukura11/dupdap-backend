@@ -18,6 +18,7 @@ import { UploadModule } from './uploads/upload.module';
 import { WsModule } from './ws/ws.module';
 import { QueueModule } from './queue/queue.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AnnouncementsModule } from './announcements/announcements.module';
 import { LoggingModule } from './logging/logging.module';
 import { CorrelationIdMiddleware } from './logging/correlation-id.middleware';
 import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
@@ -136,6 +137,7 @@ import { ComplianceModule } from './compliance/compliance.module';
 
     // Notifications — entity + API + realtime delivery.
     NotificationsModule,
+    AnnouncementsModule,
 
     // Webhooks — subscriptions + signed deliveries + retries.
     WebhooksModule,
