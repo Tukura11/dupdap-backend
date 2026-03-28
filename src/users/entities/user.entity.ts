@@ -23,14 +23,23 @@ export class User extends BaseEntity {
   @Column({ unique: true, length: 255 })
   email!: string;
 
+  @Column({ name: 'email_verified', default: false })
+  emailVerified!: boolean;
+
   @Column({ unique: true, length: 50 })
   username!: string;
 
   @Column({ name: 'password_hash', length: 255 })
   passwordHash!: string;
 
+  @Column({ name: 'pin_hash', length: 255, nullable: true, default: null })
+  pinHash!: string | null;
+
   @Column({ unique: true, length: 20, nullable: true, default: null })
   phone!: string | null;
+
+  @Column({ name: 'phone_verified', default: false })
+  phoneVerified!: boolean;
 
   @Column({ name: 'display_name', length: 100, nullable: true, default: null })
   displayName!: string | null;

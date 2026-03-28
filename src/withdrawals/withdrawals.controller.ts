@@ -15,12 +15,15 @@ import { CreateWithdrawalDto } from './dto/create-withdrawal.dto';
 import { WithdrawalQueryDto } from './dto/withdrawal-query.dto';
 
 @UseGuards(JwtAuthGuard)
-@Controller('withdrawals')
+@Controller({ path: 'withdrawals', version: '1' })
 export class WithdrawalsController {
   constructor(private readonly withdrawalsService: WithdrawalsService) {}
 
   @Post()
-  create(@Req() req: { user: { id: string } }, @Body() dto: CreateWithdrawalDto) {
+  create(
+    @Req() req: { user: { id: string } },
+    @Body() dto: CreateWithdrawalDto,
+  ) {
     return this.withdrawalsService.create(req.user.id, dto);
   }
 

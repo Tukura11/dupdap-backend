@@ -34,15 +34,19 @@ import { MaintenanceModeMiddleware } from './app-config/middleware/maintenance-m
 import { AdminModule } from './admin/admin.module';
 import { EarningsModule } from './earnings/earnings.module';
 import { SmsModule } from './sms/sms.module';
+import { PinModule } from './pin/pin.module';
+import { TransfersModule } from './transfers/transfers.module';
+import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { PasskeyModule } from './passkey/passkey.module';
 import { SecurityModule } from './security/security.module';
-import { TransactionModule } from './transactions/transactions.module';
+import { TransactionsModule } from './transactions/transactions.module';
 import { PushModule } from './push/push.module';
-import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { WaitlistModule } from './waitlist/waitlist.module';
 import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
 import { WalletsModule } from './wallets/wallets.module';
+import { ApiVersionModule } from './api-version/api-version.module';
+import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
 
 @Module({
   imports: [
@@ -84,6 +88,7 @@ import { WalletsModule } from './wallets/wallets.module';
     }),
 
     HealthModule,
+    ApiVersionModule,
     SorobanModule,
 
     // 6. Email — async transactional delivery via ZeptoMail + BullMQ.
@@ -112,6 +117,9 @@ import { WalletsModule } from './wallets/wallets.module';
 
     MerchantsModule,
     UsersModule,
+    PinModule,
+    TransfersModule,
+    WithdrawalsModule,
     SecurityModule,
     BankAccountsModule,
     VirtualAccountModule,
@@ -127,6 +135,7 @@ import { WalletsModule } from './wallets/wallets.module';
 
     // SMS — OTP + transaction alerts via Termii + BullMQ.
     SmsModule,
+    OtpModule,
 
     // Push — Firebase Cloud Messaging device token management.
     PushModule,
@@ -141,7 +150,7 @@ import { WalletsModule } from './wallets/wallets.module';
     PasskeyModule,
 
     // Transactions — activity history with cursor-based pagination.
-    TransactionModule,
+    TransactionsModule,
 
     // Waitlist — viral pre-launch signups with referral points.
     WaitlistModule,
@@ -163,6 +172,10 @@ import { WalletsModule } from './wallets/wallets.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DeprecationHeadersInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
