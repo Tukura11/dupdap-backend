@@ -32,6 +32,11 @@ export class ExecuteOffRampDto {
   @IsString()
   @IsNotEmpty()
   pin: string;
+
+  @ApiProperty({ description: 'Rate seen at preview time (for rate-lock check)', example: '1600' })
+  @IsString()
+  @IsNotEmpty()
+  previewRate: string;
 }
 
 export class OffRampHistoryQueryDto {

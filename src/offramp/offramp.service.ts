@@ -91,23 +91,28 @@ export class OffRampService {
   // ── Execute ─────────────────────────────────────────────────────────────────
 
   async execute(userId: string, dto: ExecuteOffRampDto): Promise<OffRampResponseDto> {
-    // 1. Verify PIN
+    // 1. Minimum amount guard
+    if (dto.amountUsdc < MIN_OFFRAMP_USDC) {
+      throw new BadRequestException(`Minimum off-ramp amount is $${MIN_OFFRAMP_USDC} USDC`);
+    }
+
+    // 2. Verify PIN
     await this.pinService.verifyPin(userId, dto.pin);
 
-    // 2. Load user + tier
+    // 3. Load user + tier
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    // 3. Load bank account
+    // 4. Load bank account
     const bankAccount = await this.bankAccountRepo.findOne({
       where: { id: dto.bankAccountId, userId },
     });
     if (!bankAccount) throw new NotFoundException('Bank account not found');
 
-    // 4. Check tier limits
+    // 5. Check tier limits
     await this.checkSpendLimits(user, dto.amountUsdc);
 
-    // 5. Re-compute amounts with fresh rate (rate lock check)
+    // 6. Re-compute amounts with fresh rate
     const [rateData, feeConfig] = await Promise.all([
       this.ratesService.getRate('USDC', 'NGN'),
       this.feeConfigRepo.findOne({ where: { feeType: FeeType.WITHDRAWAL, isActive: true } }),
@@ -117,12 +122,10 @@ export class OffRampService {
     const { feeUsdc, netAmountUsdc } = this.computeFee(dto.amountUsdc, feeConfig);
     const ngnAmount = (netAmountUsdc * rate * (1 - SPREAD_PERCENT / 100)).toFixed(2);
 
-    // 6. Rate lock: check if rate changed > 2% from preview
-    // We use the current rate as the reference since preview is stateless
-    // The rate lock is enforced by comparing against the rate at execution time
-    // If the rate is stale (> 5 min), RatesService throws StaleRateException
+    // 7. Rate lock: reject if rate moved > 2% since preview
+    this.checkRateLock(parseFloat(dto.previewRate), rate);
 
-    // 7. Create off-ramp record
+    // 8. Create off-ramp record
     const reference = `OFFRAMP-${randomUUID().replace(/-/g, '').slice(0, 16).toUpperCase()}`;
     const offRamp = this.offRampRepo.create({
       userId,
@@ -141,7 +144,7 @@ export class OffRampService {
     });
     const saved = await this.offRampRepo.save(offRamp);
 
-    // 8. Deduct USDC on-chain via Soroban
+    // 9. Deduct USDC on-chain via Soroban
     try {
       await this.sorobanService.withdraw(user.username, dto.amountUsdc.toFixed(8));
       await this.offRampRepo.update(saved.id, { status: OffRampStatus.USDC_DEDUCTED });

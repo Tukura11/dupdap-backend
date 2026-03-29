@@ -46,6 +46,7 @@ import { KycModule } from './kyc/kyc.module';
 import { ReportsModule } from './reports/reports.module';
 import { ApiVersionModule } from './api-version/api-version.module';
 import { OffRampModule } from './offramp/offramp.module';
+import { OtpModule } from './otp/otp.module';
 import { DeprecationHeadersInterceptor } from './api-version/deprecation-headers.interceptor';
 
 @Module({

@@ -197,7 +197,7 @@ describe('OffRampService', () => {
       pinService.verifyPin.mockRejectedValue(new BadRequestException('Invalid PIN'));
 
       await expect(
-        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '0000' }),
+        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '0000', previewRate: '1600' }),
       ).rejects.toThrow(BadRequestException);
 
       expect(pinService.verifyPin).toHaveBeenCalledWith('user-uuid', '0000');
@@ -205,16 +205,13 @@ describe('OffRampService', () => {
 
     it('deducts USDC before initiating NGN transfer', async () => {
       setupMocks();
-      // Mock Paystack API calls
       global.fetch = jest.fn()
         .mockResolvedValueOnce({ ok: true, json: async () => ({ data: { recipient_code: 'RCP_123' } }) })
         .mockResolvedValueOnce({ ok: true, json: async () => ({ data: { transfer_code: 'TRF_123' } }) });
 
-      await service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '1234' });
+      await service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '1234', previewRate: '1600' });
 
-      // USDC deducted first
       expect(sorobanService.withdraw).toHaveBeenCalledWith('alice', '10.00000000');
-      // Then NGN transfer initiated
       expect(global.fetch).toHaveBeenCalledTimes(2);
     });
 
@@ -224,13 +221,13 @@ describe('OffRampService', () => {
       bankAccountRepo.findOne.mockResolvedValue(null);
 
       await expect(
-        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bad-uuid', pin: '1234' }),
+        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bad-uuid', pin: '1234', previewRate: '1600' }),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('enforces minimum amount', async () => {
       await expect(
-        service.execute('user-uuid', { amountUsdc: 0.5, bankAccountId: 'bank-uuid', pin: '1234' }),
+        service.execute('user-uuid', { amountUsdc: 0.5, bankAccountId: 'bank-uuid', pin: '1234', previewRate: '1600' }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -239,10 +236,26 @@ describe('OffRampService', () => {
       userRepo.findOne.mockResolvedValue(mockUser());
       bankAccountRepo.findOne.mockResolvedValue(mockBankAccount());
       tierConfigRepo.findOne.mockResolvedValue({ ...mockTierConfig(), maxSingleWithdrawalUsdc: '100.00000000' });
+      ratesService.getRate.mockResolvedValue({ rate: '1600', fetchedAt: new Date(), source: 'bybit', isStale: false });
+      feeConfigRepo.findOne.mockResolvedValue(mockFeeConfig());
 
       await expect(
-        service.execute('user-uuid', { amountUsdc: 200, bankAccountId: 'bank-uuid', pin: '1234' }),
+        service.execute('user-uuid', { amountUsdc: 200, bankAccountId: 'bank-uuid', pin: '1234', previewRate: '1600' }),
       ).rejects.toThrow('Amount exceeds your tier limit');
+    });
+
+    it('throws 400 when rate changed more than 2% between preview and execute', async () => {
+      pinService.verifyPin.mockResolvedValue(undefined);
+      userRepo.findOne.mockResolvedValue(mockUser());
+      bankAccountRepo.findOne.mockResolvedValue(mockBankAccount());
+      tierConfigRepo.findOne.mockResolvedValue(mockTierConfig());
+      // Current rate is 1641 — 2.56% above preview rate of 1600
+      ratesService.getRate.mockResolvedValue({ rate: '1641', fetchedAt: new Date(), source: 'bybit', isStale: false });
+      feeConfigRepo.findOne.mockResolvedValue(mockFeeConfig());
+
+      await expect(
+        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '1234', previewRate: '1600' }),
+      ).rejects.toThrow('Rate has changed significantly. Please preview again.');
     });
 
     it('refunds USDC when Paystack transfer fails', async () => {
@@ -251,7 +264,7 @@ describe('OffRampService', () => {
       sorobanService.deposit.mockResolvedValue(undefined);
 
       await expect(
-        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '1234' }),
+        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '1234', previewRate: '1600' }),
       ).rejects.toThrow('NGN transfer failed');
 
       expect(sorobanService.deposit).toHaveBeenCalledWith('alice', '10.00000000');
@@ -275,7 +288,7 @@ describe('OffRampService', () => {
       sorobanService.withdraw.mockRejectedValue(new Error('Insufficient balance'));
 
       await expect(
-        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '1234' }),
+        service.execute('user-uuid', { amountUsdc: 10, bankAccountId: 'bank-uuid', pin: '1234', previewRate: '1600' }),
       ).rejects.toThrow('Failed to deduct USDC');
 
       expect(offRampRepo.update).toHaveBeenCalledWith(
