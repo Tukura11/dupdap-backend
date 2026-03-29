@@ -8,8 +8,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindManyOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import * as os from 'os';
+import * as fs from 'fs';
+import * as path from 'path';
 import { randomUUID } from 'crypto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bullmq';
 import { OffRamp, OffRampProvider, OffRampStatus } from './entities/off-ramp.entity';
+import { BulkDisbursement, BulkDisbursementStatus } from './entities/bulk-disbursement.entity';
 import { BankAccount } from '../bank-accounts/entities/bank-account.entity';
 import { User } from '../users/entities/user.entity';
 import { TierConfig } from '../tier-config/entities/tier-config.entity';
@@ -26,6 +32,7 @@ import {
   OffRampResponseDto,
   PreviewOffRampDto,
 } from './dto/offramp.dto';
+import { BulkDisbursementResponseDto } from './dto/bulk-disbursement.dto';
 
 export const MIN_OFFRAMP_USDC = 1;
 export const SPREAD_PERCENT = 1.5; // 1.5% spread
@@ -48,12 +55,53 @@ export class OffRampService {
     private readonly feeConfigRepo: Repository<FeeConfig>,
     @InjectRepository(Transaction)
     private readonly transactionRepo: Repository<Transaction>,
+    @InjectRepository(BulkDisbursement)
+    private readonly bulkDisbursementRepo: Repository<BulkDisbursement>,
+    @InjectQueue('offramp-jobs')
+    private readonly offrampQueue: Queue,
     private readonly ratesService: RatesService,
     private readonly sorobanService: SorobanService,
     private readonly pinService: PinService,
     private readonly flutterwaveService: FlutterwaveService,
     private readonly configService: ConfigService,
   ) {}
+
+  // ── Bulk Disbursement ───────────────────────────────────────────────────────
+
+  async uploadBulkDisbursement(userId: string, file: Express.Multer.File): Promise<BulkDisbursementResponseDto> {
+    if (!file) throw new BadRequestException('CSV file is required');
+
+    const reference = `BULK-${randomUUID().replace(/-/g, '').slice(0, 16).toUpperCase()}`;
+
+    const bulkDisbursement = this.bulkDisbursementRepo.create({
+      userId,
+      fileName: file.originalname,
+      reference,
+      status: BulkDisbursementStatus.PENDING,
+      totalItems: 0,
+    });
+    const saved = await this.bulkDisbursementRepo.save(bulkDisbursement);
+
+    // Write buffer to a temp file so the processor can read it
+    const tempDir = os.tmpdir();
+    const tempFilePath = path.join(tempDir, `${saved.id}.csv`);
+    await fs.promises.writeFile(tempFilePath, file.buffer);
+
+    // Queue the job
+    await this.offrampQueue.add('bulk-disbursement', {
+      bulkDisbursementId: saved.id,
+      filePath: tempFilePath,
+      userId,
+    });
+
+    return BulkDisbursementResponseDto.from(saved);
+  }
+
+  async getBulkDisbursementStatus(userId: string, id: string): Promise<BulkDisbursementResponseDto> {
+    const bulkDisbursement = await this.bulkDisbursementRepo.findOne({ where: { id, userId } });
+    if (!bulkDisbursement) throw new NotFoundException('Bulk disbursement not found');
+    return BulkDisbursementResponseDto.from(bulkDisbursement);
+  }
 
   // ── Preview ─────────────────────────────────────────────────────────────────
 
@@ -213,6 +261,106 @@ export class OffRampService {
 
     const result = await this.offRampRepo.findOne({ where: { id: saved.id } });
     return OffRampResponseDto.from(result!);
+  }
+
+  // ── Execute Bulk Item ───────────────────────────────────────────────────────
+
+  async executeBulkItem(userId: string, item: { amountUsdc: number; bankCode: string; accountNumber: string; accountName: string; bulkDisbursementId: string }): Promise<void> {
+    if (item.amountUsdc < MIN_OFFRAMP_USDC) {
+      throw new BadRequestException(`Minimum off-ramp amount is $${MIN_OFFRAMP_USDC} USDC`);
+    }
+
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    await this.checkSpendLimits(user, item.amountUsdc);
+
+    const [rateData, feeConfig] = await Promise.all([
+      this.ratesService.getRate('USDC', 'NGN'),
+      this.feeConfigRepo.findOne({ where: { feeType: FeeType.WITHDRAWAL, isActive: true } }),
+    ]);
+
+    const rate = parseFloat(rateData.rate);
+    const { feeUsdc, netAmountUsdc } = this.computeFee(item.amountUsdc, feeConfig);
+    const ngnAmount = (netAmountUsdc * rate * (1 - SPREAD_PERCENT / 100)).toFixed(2);
+
+    const reference = `OFFRAMP-${randomUUID().replace(/-/g, '').slice(0, 16).toUpperCase()}`;
+
+    // Pass account properties as a pseudo-entity to offramp
+    const dummyBankAccount = {
+      bankCode: item.bankCode,
+      accountNumber: item.accountNumber,
+      bankName: 'External Bank', // Real resolution depends on Provider API checks later
+      accountName: item.accountName,
+    } as any;
+    
+    const offRamp = this.offRampRepo.create({
+      userId,
+      amountUsdc: item.amountUsdc.toFixed(8),
+      feeUsdc: feeUsdc.toFixed(8),
+      netAmountUsdc: netAmountUsdc.toFixed(8),
+      rate: rateData.rate,
+      spreadPercent: SPREAD_PERCENT.toFixed(2),
+      ngnAmount,
+      bankAccountId: null, // Nullable
+      bulkDisbursementId: item.bulkDisbursementId,
+      bankAccountNumber: dummyBankAccount.accountNumber,
+      bankName: dummyBankAccount.bankName,
+      accountName: dummyBankAccount.accountName,
+      reference,
+      status: OffRampStatus.PENDING,
+    });
+    const saved = await this.offRampRepo.save(offRamp);
+
+    try {
+      await this.sorobanService.withdraw(user.username, item.amountUsdc.toFixed(8));
+      await this.offRampRepo.update(saved.id, { status: OffRampStatus.USDC_DEDUCTED });
+    } catch (err: any) {
+      await this.offRampRepo.update(saved.id, {
+        status: OffRampStatus.FAILED,
+        failureReason: `USDC deduction failed: ${err.message}`,
+      });
+      throw new BadRequestException(`Failed to deduct USDC: ${err.message}`);
+    }
+
+    let usedProvider = OffRampProvider.PAYSTACK;
+    let providerRef: string;
+
+    try {
+      providerRef = await this.initiateNgnTransferPaystack(dummyBankAccount, parseFloat(ngnAmount), reference);
+    } catch (paystackErr: any) {
+      this.logger.warn(`Paystack transfer failed for ${reference} (${paystackErr.message}), attempting Flutterwave fallback`);
+      try {
+        providerRef = await this.initiateNgnTransferFlutterwave(dummyBankAccount, parseFloat(ngnAmount), reference);
+        usedProvider = OffRampProvider.FLUTTERWAVE;
+      } catch (flwErr: any) {
+        this.logger.error(`Both providers failed for ${reference}: ${flwErr.message}`);
+        await this.refundUsdc(user.username, item.amountUsdc.toFixed(8), saved.id, flwErr.message);
+        throw new BadRequestException(`NGN transfer failed: ${flwErr.message}`);
+      }
+    }
+
+    await this.offRampRepo.update(saved.id, {
+      status: OffRampStatus.TRANSFER_INITIATED,
+      providerReference: providerRef,
+      provider: usedProvider,
+    });
+
+    const tx = this.transactionRepo.create({
+      userId,
+      type: TransactionType.WITHDRAWAL,
+      amountUsdc: item.amountUsdc.toFixed(8),
+      amount: item.amountUsdc,
+      currency: 'USDC',
+      fee: feeUsdc.toFixed(8),
+      balanceAfter: '0', 
+      status: TransactionStatus.PENDING,
+      reference,
+      description: `Bulk Off-ramp item: ${item.amountUsdc} USDC → ${ngnAmount} NGN`,
+      metadata: { offRampId: saved.id, bankAccount: item.accountNumber },
+    });
+    const savedTx = await this.transactionRepo.save(tx);
+    await this.offRampRepo.update(saved.id, { transactionId: savedTx.id });
   }
 
   // ── Get status ──────────────────────────────────────────────────────────────

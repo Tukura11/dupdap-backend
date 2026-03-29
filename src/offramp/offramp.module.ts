@@ -7,6 +7,7 @@ import { OffRampService } from './offramp.service';
 import { OffRampController } from './offramp.controller';
 import { OffRampWebhookController } from './offramp-webhook.controller';
 import { OffRampProcessor } from './offramp.processor';
+import { BulkDisbursementProcessor } from './bulk-disbursement.processor';
 import { OffRampScheduler } from './offramp.scheduler';
 import { BankAccount } from '../bank-accounts/entities/bank-account.entity';
 import { User } from '../users/entities/user.entity';
@@ -17,18 +18,19 @@ import { RatesModule } from '../rates/rates.module';
 import { SorobanModule } from '../soroban/soroban.module';
 import { PinModule } from '../pin/pin.module';
 import { FlutterwaveModule } from '../flutterwave/flutterwave.module';
+import { BulkDisbursement } from './entities/bulk-disbursement.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([OffRamp, BankAccount, User, TierConfig, FeeConfig, Transaction]),
+    TypeOrmModule.forFeature([OffRamp, BankAccount, User, TierConfig, FeeConfig, Transaction, BulkDisbursement]),
     BullModule.registerQueue({ name: 'offramp-jobs' }),
     RatesModule,
     SorobanModule,
     PinModule,
     FlutterwaveModule,
   ],
-  providers: [OffRampService, OffRampProcessor, OffRampScheduler],
+  providers: [OffRampService, OffRampProcessor, BulkDisbursementProcessor, OffRampScheduler],
   controllers: [OffRampController, OffRampWebhookController],
   exports: [OffRampService],
 })
