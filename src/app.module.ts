@@ -76,6 +76,8 @@ import { DisputesModule } from './disputes/disputes.module';
 import { UsernameModule } from './username/username.module';
 import { SplitsModule } from './splits/splits.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { DeepLinkModule } from './deeplink/deeplink.module';
+import { FlutterwaveModule } from './flutterwave/flutterwave.module';
 
 @Module({
   imports: [
@@ -231,6 +233,12 @@ import { FeedbackModule } from './feedback/feedback.module';
     // Splits — split payment requests among multiple users.
     SplitsModule,
     FeedbackModule,
+
+    // Deep linking — universal links, AASA, asset links, QR web fallbacks.
+    DeepLinkModule,
+
+    // Flutterwave — virtual accounts, transfers, balance.
+    FlutterwaveModule,
 
   ],
 
