@@ -74,6 +74,7 @@ import { SecurityHeadersMiddleware } from './security/security-headers.middlewar
 import { ComplianceModule } from './compliance/compliance.module';
 import { DisputesModule } from './disputes/disputes.module';
 import { UsernameModule } from './username/username.module';
+import { GroupExpensesModule } from './group-expenses/group-expenses.module';
 import { SplitsModule } from './splits/splits.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { FeesModule } from './fees/fees.module';
