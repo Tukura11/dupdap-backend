@@ -50,8 +50,7 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
 import { MaintenanceWindowMiddleware } from './maintenance/middleware/maintenance-window.middleware';
 
 // TODO: Enable Sentry when @sentry/nestjs module is compatible
-// import { SentryModule } from '@sentry/nestjs';
-import { AlertModule } from './alert/alert.module';
+// import { SentryModule } from '@nestjs/nestjs';
 import { GroupsModule } from './groups/groups.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { PushModule } from './push/push.module';
@@ -69,7 +68,6 @@ import { ActivityModule } from './activity/activity.module';
 import { BalanceModule } from './balance/balance.module';
 import { SentryModule as SentryUserContextModule } from './sentry/sentry.module';
 import { SentryUserMiddleware } from './sentry/sentry-user.middleware';
-import { OtpModule } from './otp/otp.module';
 import { PwaModule } from './pwa/pwa.module';
 import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
 import { ComplianceModule } from './compliance/compliance.module';
@@ -80,6 +78,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { DeepLinkModule } from './deeplink/deeplink.module';
 import { FlutterwaveModule } from './flutterwave/flutterwave.module';
 import { FeatureFlagModule } from './feature-flags/feature-flag.module';
+import { PayoutsModule } from './payouts/payouts.module';
 
 @Module({
   imports: [
@@ -168,7 +167,6 @@ import { FeatureFlagModule } from './feature-flags/feature-flag.module';
     SandboxModule,
     FeatureFlagsModule,
     MaintenanceModule,
-    AlertModule,
     GroupsModule,
     BankAccountsModule,
     VirtualAccountModule,
@@ -245,6 +243,8 @@ import { FeatureFlagModule } from './feature-flags/feature-flag.module';
 
     // User-level feature flags (rollouts, A/B) — Redis-cached evaluation.
     FeatureFlagModule,
+
+    PayoutsModule,
 
   ],
 
