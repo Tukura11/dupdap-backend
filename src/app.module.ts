@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { MerchantAnalyticsModule } from './analytics/merchant-analytics.module';
 import { MerchantsModule } from './merchants/merchants.module';
 import { GroupsModule } from './groups/groups.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { PaymentsModule } from './payments/payments.module';
 import { QueueModule } from './queues/queue.module';
 import { SettlementsModule } from './settlements/settlements.module';
@@ -52,6 +53,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     AuthModule,
     MerchantsModule,
     GroupsModule,
+    NotificationsModule,
     PaymentsModule,
     StellarModule,
     SettlementsModule,

@@ -1,10 +1,11 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory, Reflector, HttpAdapterHost } from '@nestjs/core';
 import { ClassSerializerInterceptor, ValidationPipe, RequestMethod } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { readTelemetryConfig, shutdownTelemetry, startTelemetry } from './telemetry/telemetry';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { version } = require('../package.json') as { version: string };
 
@@ -34,6 +35,7 @@ async function bootstrap(): Promise<void> {
       transform: true,
     }),
   );
+  app.useGlobalFilters(new AllExceptionsFilter(app.get(HttpAdapterHost), config));
   app.useGlobalInterceptors(new LoggingInterceptor(), new ClassSerializerInterceptor(app.get(Reflector)));
 
   const swaggerConfig = new DocumentBuilder()
