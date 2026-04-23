@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Exclude, Transform } from 'class-transformer';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Settlement } from '../../settlements/entities/settlement.entity';
 import { Webhook } from '../../webhooks/entities/webhook.entity';
@@ -29,6 +30,7 @@ export class Merchant {
   @Column({ unique: true })
   email: string;
 
+  @Exclude()
   @Column()
   passwordHash: string;
 
@@ -41,6 +43,7 @@ export class Merchant {
   @Column({ nullable: true })
   country: string;
 
+  @Transform(({ value }) => (value ? `****${String(value).slice(-4)}` : null))
   @Column({ nullable: true })
   bankAccountNumber: string;
 
@@ -59,6 +62,7 @@ export class Merchant {
   @Column({ nullable: true })
   apiKey: string;
 
+  @Exclude()
   @Column({ nullable: true })
   apiKeyHash: string;
 
