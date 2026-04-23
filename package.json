@@ -20,7 +20,9 @@
     "test:e2e": "jest --testPathPattern=e2e-spec",
     "migration:generate": "typeorm migration:generate",
     "migration:run": "typeorm migration:run",
-    "migration:revert": "typeorm migration:revert"
+    "migration:revert": "typeorm migration:revert",
+    "migration:check": "ts-node --transpile-only scripts/migration-check.ts",
+    "migration:rollback:check": "ts-node --transpile-only scripts/migration-rollback-check.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
