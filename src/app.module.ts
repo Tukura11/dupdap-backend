@@ -95,7 +95,7 @@ import { GroupsModule } from './groups/groups.module';
     ApiVersionModule,
     SorobanModule,
 
-    // 6. Email — async transactional delivery via ZeptoMail + BullMQ.
+    // 6. Email — async transactional delivery via Nodemailer (SMTP/SendGrid) + Bull queue.
     EmailModule,
 
     // 7. Rates — USDC/NGN live rates with Redis cache + BullMQ polling.

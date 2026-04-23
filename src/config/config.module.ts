@@ -7,6 +7,7 @@ import { redisConfig } from './redis.config';
 import { jwtConfig } from './jwt.config';
 import { stellarConfig } from './stellar.config';
 import { zeptoConfig } from './zepto.config';
+import { emailConfig } from './email.config';
 import { r2Config } from './r2.config';
 import { flutterwaveConfig } from './flutterwave.config';
 import { paystackConfig } from './paystack.config';
@@ -104,14 +105,21 @@ const validationSchema = Joi.object({
     .required()
     .messages({ 'any.required': 'STELLAR_USDC_ISSUER is required' }),
 
-  // ── Zepto Mail ───────────────────────────────────────────────────────────
-  ZEPTOMAIL_API_KEY: Joi.string()
+  // ── Zepto Mail (legacy — kept for backward compat) ──────────────────────
+  ZEPTOMAIL_API_KEY: Joi.string().allow('').optional(),
+  ZEPTOMAIL_FROM_EMAIL: Joi.string().email().allow('').optional(),
+
+  // ── Email (Nodemailer / SMTP / SendGrid) ──────────────────────────────────
+  EMAIL_PROVIDER: Joi.string().valid('smtp', 'sendgrid').default('smtp'),
+  EMAIL_SMTP_HOST: Joi.string().default('smtp.sendgrid.net'),
+  EMAIL_SMTP_PORT: Joi.number().integer().positive().default(587),
+  EMAIL_SMTP_SECURE: Joi.boolean().default(false),
+  EMAIL_SMTP_USER: Joi.string().default('apikey'),
+  EMAIL_SMTP_PASS: Joi.string()
     .required()
-    .messages({ 'any.required': 'ZEPTOMAIL_API_KEY is required' }),
-  ZEPTOMAIL_FROM_EMAIL: Joi.string().email().required().messages({
-    'any.required': 'ZEPTOMAIL_FROM_EMAIL is required',
-    'string.email': 'ZEPTOMAIL_FROM_EMAIL must be a valid email address',
-  }),
+    .messages({ 'any.required': 'EMAIL_SMTP_PASS is required (SMTP password or SendGrid API key)' }),
+  EMAIL_FROM: Joi.string().email().default('noreply@cheesepay.xyz'),
+  EMAIL_FROM_NAME: Joi.string().default('CheesePay'),
 
   // ── Cloudflare R2 ─────────────────────────────────────────────────────────
   R2_ACCOUNT_ID: Joi.string()
@@ -159,6 +167,7 @@ const validationSchema = Joi.object({
         jwtConfig,
         stellarConfig,
         zeptoConfig,
+        emailConfig,
         r2Config,
         flutterwaveConfig,
         paystackConfig,

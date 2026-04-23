@@ -4,8 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job } from 'bull';
 import { EmailLog, EmailStatus } from './entities/email-log.entity';
-import { ZeptoMailService } from './zepto-mail.service';
-import { EMAIL_QUEUE, EmailJobPayload, EmailService } from './email.service';
+import { NodemailerService } from './nodemailer.service';
+import { EMAIL_QUEUE, EmailJobPayload } from './email.service';
 
 @Processor(EMAIL_QUEUE)
 export class EmailProcessor {
@@ -14,23 +14,16 @@ export class EmailProcessor {
   constructor(
     @InjectRepository(EmailLog)
     private readonly logRepo: Repository<EmailLog>,
-    private readonly zeptoMail: ZeptoMailService,
-    private readonly emailService: EmailService,
+    private readonly mailer: NodemailerService,
   ) {}
 
   @Process()
   async handleSend(job: Job<EmailJobPayload>): Promise<void> {
     const { logId, to, templateAlias, mergeData } = job.data;
 
-    await this.logRepo.update(logId, {
-      attemptCount: job.attemptsMade + 1,
-    });
+    await this.logRepo.update(logId, { attemptCount: job.attemptsMade + 1 });
 
-    const { messageId } = await this.zeptoMail.send(
-      to,
-      templateAlias,
-      mergeData,
-    );
+    const { messageId } = await this.mailer.send(to, templateAlias, mergeData);
 
     await this.logRepo.update(logId, {
       status: EmailStatus.SENT,
@@ -44,7 +37,8 @@ export class EmailProcessor {
   @OnQueueFailed()
   async handleFailed(job: Job<EmailJobPayload>, err: Error): Promise<void> {
     const { logId } = job.data;
-    const isExhausted = job.attemptsMade >= (job.opts.attempts ?? 3);
+    // attempts=2 means: 1 initial attempt + 1 retry → exhausted after 2nd failure
+    const isExhausted = job.attemptsMade >= (job.opts.attempts ?? 2);
 
     this.logger.warn(
       `Email job failed logId=${logId} attempt=${job.attemptsMade} exhausted=${isExhausted}: ${err.message}`,
@@ -57,7 +51,4 @@ export class EmailProcessor {
       });
     }
   }
-
-  // Custom backoff strategy — called by Bull before each retry
-  // Registered via BullModule options in EmailModule
 }
