@@ -3,7 +3,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AdminAlertModule } from './alerts/admin-alert.module';
 import { AuthModule } from './auth/auth.module';
+import { HealthModule } from './health/health.module';
+import { MerchantAnalyticsModule } from './analytics/merchant-analytics.module';
 import { MerchantsModule } from './merchants/merchants.module';
 import { PaymentsModule } from './payments/payments.module';
 import { QueueModule } from './queues/queue.module';
@@ -42,6 +45,9 @@ import { WebhooksModule } from './webhooks/webhooks.module';
       }),
       inject: [ConfigService],
     }),
+    HealthModule,
+    MerchantAnalyticsModule,
+    AdminAlertModule,
     AuthModule,
     MerchantsModule,
     PaymentsModule,
