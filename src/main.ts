@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { readTelemetryConfig, shutdownTelemetry, startTelemetry } from './telemetry/telemetry';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
+import { SentryService } from './sentry/sentry.service';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { version } = require('../package.json') as { version: string };
 
@@ -14,26 +15,9 @@ async function bootstrap(): Promise<void> {
   startTelemetry(readTelemetryConfig());
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
-  app.use(
-    helmet({
-      hsts: true,
-      frameguard: true,
-      noSniff: true,
-      xssFilter: true,
-      hidePoweredBy: true,
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", 'data:', 'validator.swagger.io'],
-        },
-      },
-    }),
-  );
-
-  // explicitly disable x-powered-by for Express
-  app.getHttpAdapter().getInstance().disable('x-powered-by');
+  // Initialize Sentry before other middleware so it can capture bootstrap errors
+  const sentryService = app.get(SentryService);
+  sentryService.init();
 
   const config = app.get(ConfigService);
   const port = parseInt(String(config.get('PORT', 3000)), 10);
