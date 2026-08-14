@@ -110,7 +110,7 @@ import Redis from 'ioredis';
         port: config.get<number>('DB_PORT', 5432),
         username: config.get('DB_USER', 'postgres'),
         password: config.get('DB_PASSWORD'),
-        database: config.get('DB_NAME', 'cheesepay'),
+        database: config.get('DB_NAME', 'dupdub'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: false,
         logging: config.get('NODE_ENV') === 'development',

@@ -21,7 +21,7 @@ let sdk: NodeSDK | null = null;
 export function readTelemetryConfig(): TelemetryConfig {
   return {
     enabled: process.env.OTEL_ENABLED === 'true',
-    serviceName: process.env.OTEL_SERVICE_NAME ?? 'cheesepay-backend',
+    serviceName: process.env.OTEL_SERVICE_NAME ?? 'dupdub-backend',
     collectorUrl: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? null,
     consoleExporter: process.env.OTEL_TRACE_CONSOLE === 'true',
   };
@@ -70,7 +70,7 @@ export async function traceAsyncOperation<T>(
   attributes: Record<string, string | number | boolean | undefined>,
   operation: () => Promise<T>,
 ): Promise<T> {
-  const tracer = trace.getTracer('cheese-backend');
+  const tracer = trace.getTracer('dupdub-backend');
 
   return tracer.startActiveSpan(name, async (span) => {
     Object.entries(attributes).forEach(([key, value]) => {

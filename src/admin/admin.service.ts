@@ -296,7 +296,7 @@ export class AdminService {
     merchant.totpSecret = secret;
     await this.merchantsRepo.save(merchant);
 
-    const otpauthUri = `otpauth://totp/CheesePay:${merchant.email}?secret=${secret}&issuer=CheesePay`;
+    const otpauthUri = `otpauth://totp/DupDub:${merchant.email}?secret=${secret}&issuer=DupDub`;
     return { secret, otpauthUri };
   }
 

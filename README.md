@@ -1,8 +1,8 @@
-# CheesePay Backend
+# DupDub Backend
 
 > Crypto-to-fiat settlement API — merchants accept USDC on Stellar, customers pay from a wallet, and the platform settles fiat to the merchant's bank account.
 
-This is the backend service for the CheesePay/DupDub payment platform. It exposes a REST API (NestJS), watches the Stellar network for incoming payments, drives the payment/settlement lifecycle, and talks to the on-chain Soroban contracts that hold funds in escrow.
+This is the backend service for the DupDub payment platform. It exposes a REST API (NestJS), watches the Stellar network for incoming payments, drives the payment/settlement lifecycle, and talks to the on-chain Soroban contracts that hold funds in escrow.
 
 Related repos:
 - [`dupdap-frontend`](../dupdap-frontend) — merchant dashboard & customer payment portal (Next.js)
@@ -143,7 +143,7 @@ Full list lives in [`.env.example`](.env.example); the categories below cover wh
 PORT=3000
 API_PREFIX=api/v1
 NODE_ENV=development
-ALLOWED_ORIGINS=https://app.cheesepay.xyz,https://cheesepay.xyz   # comma-separated, production only
+ALLOWED_ORIGINS=https://app.dupdub.xyz,https://dupdub.xyz   # comma-separated, production only
 ```
 
 #### Database
@@ -152,7 +152,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=your_secure_password
-DB_NAME=cheesepay
+DB_NAME=dupdub
 DB_POOL_MIN=2
 DB_POOL_MAX=20
 DB_ACQUIRE_TIMEOUT_MS=10000
@@ -227,8 +227,8 @@ EMAIL_SMTP_PORT=587
 EMAIL_SMTP_SECURE=false
 EMAIL_SMTP_USER=apikey
 EMAIL_SMTP_PASS=your_sendgrid_api_key_or_smtp_password
-EMAIL_FROM=noreply@cheesepay.xyz
-EMAIL_FROM_NAME=CheesePay
+EMAIL_FROM=noreply@dupdub.xyz
+EMAIL_FROM_NAME=DupDub
 SENDGRID_API_KEY=
 ```
 
@@ -241,14 +241,14 @@ BETTER_UPTIME_API_TOKEN=
 BETTER_UPTIME_HEARTBEAT_URL=https://betteruptime.com/api/v1/heartbeat/xxxxx
 
 ADMIN_ALERT_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz
-ADMIN_ALERT_EMAIL=oncall@cheesepay.xyz
+ADMIN_ALERT_EMAIL=oncall@dupdub.xyz
 ADMIN_ALERT_COOLDOWN_MINUTES=30
 ADMIN_ALERT_FAILURE_THRESHOLD=1
 ADMIN_ALERT_STELLAR_FAILURE_THRESHOLD=1
 GRAFANA_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz
 
 OTEL_ENABLED=false
-OTEL_SERVICE_NAME=cheesepay-backend
+OTEL_SERVICE_NAME=dupdub-backend
 OTEL_EXPORTER_OTLP_ENDPOINT=
 OTEL_TRACE_CONSOLE=false
 ```
@@ -258,7 +258,7 @@ OTEL_TRACE_CONSOLE=false
 ADMIN_ALLOWED_IPS=127.0.0.1,::1
 ADMIN_IP_BYPASS_IN_DEV=true
 
-BACKUP_S3_BUCKET=cheesepay-db-backups
+BACKUP_S3_BUCKET=dupdub-db-backups
 BACKUP_S3_REGION=us-east-1
 BACKUP_S3_ENDPOINT=
 BACKUP_S3_ACCESS_KEY_ID=your_access_key_id

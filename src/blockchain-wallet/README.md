@@ -1,7 +1,7 @@
 # Blockchain Wallet Module - Implementation Summary
 
 ## Overview
-Complete implementation of the blockchain wallet module that bridges Cheese user accounts with their on-chain Stellar identities. Every user gets a server-side generated Stellar keypair with AES-256-GCM encrypted secret key storage.
+Complete implementation of the blockchain wallet module that bridges DupDub user accounts with their on-chain Stellar identities. Every user gets a server-side generated Stellar keypair with AES-256-GCM encrypted secret key storage.
 
 ## ✅ Acceptance Criteria Completed
 
@@ -80,7 +80,7 @@ test/
 
 ## 🔗 Integration Points
 
-- **SorobanService**: Stub for CheesePay contract calls
+- **SorobanService**: Stub for DupDub contract calls
 - **NotificationService**: Welcome email on wallet creation
 - **EventEmitter**: Decoupled event-driven architecture
 - **JwtAuthGuard**: Authenticated endpoints

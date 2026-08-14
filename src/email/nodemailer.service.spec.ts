@@ -14,8 +14,8 @@ const mockCfg = {
   secure: false,
   user: 'apikey',
   pass: 'SG.test',
-  from: 'noreply@cheesepay.xyz',
-  fromName: 'CheesePay',
+  from: 'noreply@dupdub.xyz',
+  fromName: 'DupDub',
 };
 
 const LAYOUT = `<!DOCTYPE html><html><body>{{{body}}}</body></html>`;

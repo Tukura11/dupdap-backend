@@ -51,13 +51,13 @@ aws s3 cp s3://<BACKUP_S3_BUCKET>/backups/<filename>.dump /tmp/restore.dump \
   --region <BACKUP_S3_REGION>
 
 # 2. Create a fresh target database
-psql -h <DB_HOST> -U <DB_USER> -c "CREATE DATABASE cheesepay_restore;"
+psql -h <DB_HOST> -U <DB_USER> -c "CREATE DATABASE dupdub_restore;"
 
 # 3. Restore
-pg_restore -Fc -h <DB_HOST> -U <DB_USER> -d cheesepay_restore /tmp/restore.dump
+pg_restore -Fc -h <DB_HOST> -U <DB_USER> -d dupdub_restore /tmp/restore.dump
 
 # 4. Verify row counts match expectations
-psql -h <DB_HOST> -U <DB_USER> -d cheesepay_restore \
+psql -h <DB_HOST> -U <DB_USER> -d dupdub_restore \
   -c "SELECT schemaname, tablename, n_live_tup FROM pg_stat_user_tables ORDER BY n_live_tup DESC;"
 
 # 5. Promote / swap connection string in app config
@@ -69,7 +69,7 @@ psql -h <DB_HOST> -U <DB_USER> -d cheesepay_restore \
 # 1. Stop the primary Postgres instance
 
 # 2. Restore the base backup (latest pg_dump or a base backup taken with pg_basebackup)
-pg_restore -Fc -h <DB_HOST> -U <DB_USER> -d cheesepay_pitr /tmp/restore.dump
+pg_restore -Fc -h <DB_HOST> -U <DB_USER> -d dupdub_pitr /tmp/restore.dump
 
 # 3. Create recovery.conf (Postgres < 12) or postgresql.conf entry (Postgres >= 12):
 #    recovery_target_time = '2025-01-15 14:30:00 UTC'

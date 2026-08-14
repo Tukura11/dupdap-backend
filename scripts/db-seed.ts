@@ -5,7 +5,7 @@ import { seedDatabase } from '../src/database/seeds';
 
 async function main(): Promise<void> {
   const password = process.env.DB_PASSWORD || process.env.DB_PASS || '';
-  const database = process.env.NODE_ENV === 'test' ? process.env.DB_NAME_TEST || 'cheesepay_test' : process.env.DB_NAME || 'cheesepay';
+  const database = process.env.NODE_ENV === 'test' ? process.env.DB_NAME_TEST || 'dupdub_test' : process.env.DB_NAME || 'dupdub';
 
   const connection = await createConnection({
     type: 'postgres',

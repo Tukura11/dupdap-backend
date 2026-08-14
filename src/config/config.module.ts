@@ -112,8 +112,8 @@ const validationSchema = Joi.object({
   EMAIL_SMTP_PASS: Joi.string()
     .required()
     .messages({ 'any.required': 'EMAIL_SMTP_PASS is required (SMTP password or SendGrid API key)' }),
-  EMAIL_FROM: Joi.string().email().default('noreply@cheesepay.xyz'),
-  EMAIL_FROM_NAME: Joi.string().default('CheesePay'),
+  EMAIL_FROM: Joi.string().email().default('noreply@dupdub.xyz'),
+  EMAIL_FROM_NAME: Joi.string().default('DupDub'),
 
   // ── Cloudflare R2 ─────────────────────────────────────────────────────────
   R2_ACCOUNT_ID: Joi.string()

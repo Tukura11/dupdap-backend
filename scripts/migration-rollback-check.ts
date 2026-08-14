@@ -10,7 +10,7 @@ async function main(): Promise<void> {
     port: parseInt(String(process.env.DB_PORT || '5432'), 10),
     username: process.env.DB_USER || 'postgres',
     password,
-    database: process.env.DB_NAME || 'cheesepay',
+    database: process.env.DB_NAME || 'dupdub',
     entities: [],
     migrations: [path.join(__dirname, '..', 'src', 'database', 'migrations', '*.{ts,js}')],
     migrationsTableName: 'typeorm_migrations',

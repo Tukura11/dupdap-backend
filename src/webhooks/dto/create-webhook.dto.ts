@@ -3,7 +3,7 @@ import { IsArray, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateWebhookDto {
-  @ApiProperty({ example: 'https://example.com/webhooks/cheesepay' })
+  @ApiProperty({ example: 'https://example.com/webhooks/dupdub' })
   @IsString()
   @Transform(({ value }) => value?.trim())
   url!: string;

@@ -14,7 +14,7 @@ const SUPPORTED_VERSIONS = ['v1'];
 /**
  * Sets X-API-Version and X-Supported-Versions headers on every response.
  * Returns 406 Not Acceptable when the client sends an unsupported
- * Accept: application/vnd.cheesepay.{version}+json header.
+ * Accept: application/vnd.dupdub.{version}+json header.
  */
 @Injectable()
 export class VersioningInterceptor implements NestInterceptor {
@@ -23,7 +23,7 @@ export class VersioningInterceptor implements NestInterceptor {
     const acceptHeader: string | undefined = req.headers['accept'];
 
     if (acceptHeader) {
-      const vndMatch = acceptHeader.match(/application\/vnd\.cheesepay\.(\w+)\+json/);
+      const vndMatch = acceptHeader.match(/application\/vnd\.dupdub\.(\w+)\+json/);
       if (vndMatch) {
         const requestedVersion = vndMatch[1];
         if (!SUPPORTED_VERSIONS.includes(requestedVersion)) {

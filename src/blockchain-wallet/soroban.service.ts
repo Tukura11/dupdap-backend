@@ -44,7 +44,7 @@ export class ReentrantCallError extends Error {
 // ── Service ───────────────────────────────────────────────────────────────────
 
 /**
- * SorobanService wraps the CheesePay Soroban smart contract.
+ * SorobanService wraps the DupDub Soroban smart contract.
  *
  * ## Global pause switch
  * An admin can call pause() to instantly halt all deposits, releases, and
@@ -162,7 +162,7 @@ export class SorobanService {
     this.acquireLock();
     try {
       this.logger.log(`Depositing ${amountUsdc} USDC from ${stellarAddress} into escrow`);
-      // TODO: invoke CheesePay contract deposit(stellarAddress, amountUsdc)
+      // TODO: invoke DupDub contract deposit(stellarAddress, amountUsdc)
     } finally {
       this.releaseLock();
     }
@@ -177,7 +177,7 @@ export class SorobanService {
     this.acquireLock();
     try {
       this.logger.log(`Releasing escrow for payment ${paymentId} → ${merchantAddress}`);
-      // TODO: invoke CheesePay contract release(paymentId, merchantAddress)
+      // TODO: invoke DupDub contract release(paymentId, merchantAddress)
     } finally {
       this.releaseLock();
     }
@@ -192,7 +192,7 @@ export class SorobanService {
     this.acquireLock();
     try {
       this.logger.log(`Refunding escrow for payment ${paymentId} → ${customerAddress}`);
-      // TODO: invoke CheesePay contract refund(paymentId, customerAddress)
+      // TODO: invoke DupDub contract refund(paymentId, customerAddress)
     } finally {
       this.releaseLock();
     }
@@ -202,18 +202,18 @@ export class SorobanService {
 
   async registerUser(username: string, publicKey: string): Promise<void> {
     this.logger.log(`Registering user ${username} (${publicKey}) on Soroban contract`);
-    // TODO: invoke CheesePay contract registerUser(username, publicKey)
+    // TODO: invoke DupDub contract registerUser(username, publicKey)
   }
 
   async getBalance(stellarAddress: string): Promise<string> {
     this.logger.log(`Fetching USDC balance for ${stellarAddress}`);
-    // TODO: invoke CheesePay contract getBalance(stellarAddress)
+    // TODO: invoke DupDub contract getBalance(stellarAddress)
     return '0';
   }
 
   async getStakeBalance(stellarAddress: string): Promise<string> {
     this.logger.log(`Fetching stake balance for ${stellarAddress}`);
-    // TODO: invoke CheesePay contract getStakeBalance(stellarAddress)
+    // TODO: invoke DupDub contract getStakeBalance(stellarAddress)
     return '0';
   }
 

@@ -16,7 +16,7 @@ sudo apt-get install pgbouncer
 
 # Docker
 docker run -d --name pgbouncer \
-  -e DATABASE_URL="postgres://user:pass@db-host:5432/cheesepay" \
+  -e DATABASE_URL="postgres://user:pass@db-host:5432/dupdub" \
   -p 5432:5432 \
   edoburu/pgbouncer
 ```
@@ -25,7 +25,7 @@ docker run -d --name pgbouncer \
 
 ```ini
 [databases]
-cheesepay = host=<DB_HOST> port=5432 dbname=cheesepay
+dupdub = host=<DB_HOST> port=5432 dbname=dupdub
 
 [pgbouncer]
 listen_addr = 0.0.0.0

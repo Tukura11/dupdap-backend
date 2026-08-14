@@ -88,7 +88,7 @@ export class EmailProcessor {
     const from =
       this.configService.get<string>("EMAIL_FROM") ||
       this.configService.get<string>("SMTP_FROM") ||
-      `no-reply@${this.configService.get<string>("EMAIL_DOMAIN", "cheesepay.local")}`;
+      `no-reply@${this.configService.get<string>("EMAIL_DOMAIN", "dupdub.local")}`;
 
     const sendGridKey = this.configService.get<string>("SENDGRID_API_KEY");
     if (sendGridKey) {

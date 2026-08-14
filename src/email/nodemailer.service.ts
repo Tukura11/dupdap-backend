@@ -15,7 +15,7 @@ export interface MailSendResult {
 const TEMPLATES_DIR = path.join(__dirname, 'templates');
 
 const SUBJECTS: Record<string, string> = {
-  welcome: 'Welcome to CheesePay',
+  welcome: 'Welcome to DupDub',
   'payment-confirmed': 'Payment Confirmed',
   'settlement-completed': 'Settlement Completed',
   'payment-failed': 'Payment Failed',

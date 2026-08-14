@@ -11,8 +11,8 @@ export const emailConfig = registerAs('email', () => ({
   user: process.env['EMAIL_SMTP_USER'] ?? 'apikey', // SendGrid uses literal "apikey"
   pass: process.env['EMAIL_SMTP_PASS'] ?? '',       // SMTP password or SendGrid API key
 
-  from: process.env['EMAIL_FROM'] ?? 'noreply@cheesepay.xyz',
-  fromName: process.env['EMAIL_FROM_NAME'] ?? 'CheesePay',
+  from: process.env['EMAIL_FROM'] ?? 'noreply@dupdub.xyz',
+  fromName: process.env['EMAIL_FROM_NAME'] ?? 'DupDub',
 }));
 
 export type EmailConfig = ReturnType<typeof emailConfig>;

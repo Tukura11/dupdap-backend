@@ -5,7 +5,7 @@ import * as path from 'path';
 const { like, string, number } = MatchersV3;
 
 const provider = new PactV3({
-  consumer: 'CheesePay',
+  consumer: 'DupDub',
   provider: 'PartnerSettlementAPI',
   dir: path.resolve(__dirname, '../../../pacts'),
 });

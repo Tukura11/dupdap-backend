@@ -1,8 +1,8 @@
 {
-  "name": "cheesepay-backend",
+  "name": "dupdub-backend",
   "version": "1.0.0",
-  "description": "CheesePay - Crypto-to-Fiat Settlement API",
-  "author": "CheesePay Team",
+  "description": "DupDub - Crypto-to-Fiat Settlement API",
+  "author": "DupDub Team",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

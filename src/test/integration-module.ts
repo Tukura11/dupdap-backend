@@ -16,7 +16,7 @@ export async function createIntegrationTestModule(
         port: Number(process.env.DB_PORT ?? 5432),
         username: process.env.DB_USER ?? 'postgres',
         password: process.env.DB_PASSWORD ?? 'postgres',
-        database: process.env.DB_NAME_TEST ?? 'cheesepay_test',
+        database: process.env.DB_NAME_TEST ?? 'dupdub_test',
         entities: TEST_ENTITIES,
         synchronize: true,
         logging: false,

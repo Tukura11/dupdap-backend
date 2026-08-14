@@ -22,7 +22,7 @@ export class MaintenanceModeMiddleware implements NestMiddleware {
 
     if (maintenanceMode === true) {
       throw new ServiceUnavailableException({
-        message: "Cheese is under maintenance. We'll be back soon.",
+        message: "DupDub is under maintenance. We'll be back soon.",
       });
     }
 

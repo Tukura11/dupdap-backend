@@ -21,7 +21,7 @@ export class MaintenanceModeMiddleware implements NestMiddleware {
       try {
         if (JSON.parse(raw) === true) {
           throw new ServiceUnavailableException(
-            "Cheese is under maintenance. We'll be back soon.",
+            "DupDub is under maintenance. We'll be back soon.",
           );
         }
       } catch (e) {

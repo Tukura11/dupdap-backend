@@ -120,7 +120,7 @@ async function bootstrap(): Promise<void> {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('CheesePay API')
+    .setTitle('DupDub API')
     .setDescription(
       'Crypto-to-Fiat settlement platform. Use **Authorize** for JWT Bearer and/or **X-API-Key** for API key auth. ' +
         `HTTP API routes are under \`/${apiPrefix}\`; Swagger UI is at \`/docs\`.`,
@@ -148,7 +148,7 @@ async function bootstrap(): Promise<void> {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document, {
-    customSiteTitle: 'CheesePay API',
+    customSiteTitle: 'DupDub API',
     swaggerOptions: {
       persistAuthorization: true,
       docExpansion: 'list',
